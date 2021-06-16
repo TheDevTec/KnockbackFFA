@@ -1,15 +1,11 @@
 package me.devtec.knockbackffa;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import me.devtec.theapi.TheAPI;
 import me.devtec.theapi.apis.ItemCreatorAPI;
 import me.devtec.theapi.blocksapi.BlocksAPI;
 import me.devtec.theapi.scheduler.Tasker;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,9 +13,12 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityAirChangeEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class KnockEvents implements Listener {
     protected static Map<Location, BlockStateRemove> blocky = new HashMap<>();
