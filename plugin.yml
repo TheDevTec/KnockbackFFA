@@ -1,0 +1,6 @@
+name: KnockbackFFA
+main: me.devtec.knockbackffa.Loader
+author: DevTec & AdoNikeOFFICE
+version: 1.0
+api-version: 1.13
+depend: [TheAPI]
