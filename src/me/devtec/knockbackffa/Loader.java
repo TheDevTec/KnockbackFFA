@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,6 +15,7 @@ import me.devtec.theapi.apis.ItemCreatorAPI;
 import me.devtec.theapi.blocksapi.BlocksAPI;
 import me.devtec.theapi.scheduler.Scheduler;
 import me.devtec.theapi.scheduler.Tasker;
+import me.devtec.theapi.utils.Position;
 import me.devtec.theapi.utils.datakeeper.Data;
 
 public class Loader extends JavaPlugin {
@@ -41,44 +41,47 @@ public class Loader extends JavaPlugin {
 			}
 		}.runRepeating(20*60*15, 20*60*15);
 		new Tasker(){
-			List<Location>remove=new ArrayList<>();
+			List<Position>remove=new ArrayList<>();
 			public void run() {
-				for(Entry<Location, BlockStateRemove> ll:KnockEvents.blocky.entrySet()){
-					Location l=ll.getKey();
+				for(Entry<Position, BlockStateRemove> ll:KnockEvents.blocky.entrySet()){
+					Position l=ll.getKey();
 					BlockStateRemove r = ll.getValue();
-					if(r.i==0){
-						++r.i;
-						BlocksAPI.set(l.getBlock(),Material.YELLOW_TERRACOTTA);
-						continue;
-					}
-					if(r.i==1){
-						++r.i;
-						BlocksAPI.set(l.getBlock(),Material.ORANGE_TERRACOTTA);
-						continue;
-					}
-					if(r.i==2){
-						++r.i;
-						BlocksAPI.set(l.getBlock(),Material.RED_TERRACOTTA);
-						continue;
-					}
-					if(r.i==3){
-						++r.i;
-						BlocksAPI.set(l.getBlock(),Material.LIGHT_BLUE_TERRACOTTA);
-						continue;
-					}
-					if(r.i==4){
-						BlocksAPI.set(l.getBlock(), Material.AIR);
-						if(r.giveBack)
-							TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.WHITE_TERRACOTTA,1,"&cBlocks"));
-						remove.add(l);
+					if(r.placeTime-System.currentTimeMillis()/1000<=0) {
+						r.placeTime=System.currentTimeMillis()/1000+5;
+						if(r.i==0){
+							++r.i;
+							BlocksAPI.set(l,Material.YELLOW_TERRACOTTA);
+							continue;
+						}
+						if(r.i==1){
+							++r.i;
+							BlocksAPI.set(l,Material.ORANGE_TERRACOTTA);
+							continue;
+						}
+						if(r.i==2){
+							++r.i;
+							BlocksAPI.set(l,Material.PINK_TERRACOTTA);
+							continue;
+						}
+						if(r.i==3){
+							++r.i;
+							BlocksAPI.set(l,Material.RED_TERRACOTTA);
+							continue;
+						}
+						if(r.i==4){
+							BlocksAPI.set(l, Material.AIR);
+							if(r.giveBack)
+								TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.WHITE_TERRACOTTA,1,"&cBlocks"));
+							remove.add(l);
+						}
 					}
 				}
-				for(Location s:remove){
+				for(Position s:remove){
 					KnockEvents.blocky.remove(s);
 				}
 				remove.clear();
 			}
-		}.runRepeating(0,100);
+		}.runRepeating(0,10);
 	}
 	
 	public void onDisable() {

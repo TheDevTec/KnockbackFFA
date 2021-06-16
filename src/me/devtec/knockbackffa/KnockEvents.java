@@ -3,7 +3,6 @@ package me.devtec.knockbackffa;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,8 +14,10 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
+import me.devtec.theapi.utils.Position;
+
 public class KnockEvents implements Listener {
-    protected static Map<Location, BlockStateRemove> blocky = new HashMap<>();
+    protected static Map<Position, BlockStateRemove> blocky = new HashMap<>();
     protected static Map<Player, Player> lastHit = new HashMap<>();
     
     @EventHandler
@@ -51,13 +52,14 @@ public class KnockEvents implements Listener {
 
     @EventHandler
     public void onPlace(BlockPlaceEvent e){
-        blocky.put(e.getBlock().getLocation(),new BlockStateRemove(e.getPlayer()));
+        blocky.put(new Position(e.getBlock().getLocation()),new BlockStateRemove(e.getPlayer()));
     }
 }
 
  class BlockStateRemove {
     Player player;
     boolean giveBack=true;
+    long placeTime = System.currentTimeMillis()/1000+5;
     int i;
     public BlockStateRemove(Player p){
         player=p;
