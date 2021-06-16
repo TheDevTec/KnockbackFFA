@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import me.devtec.theapi.TheAPI;
 import me.devtec.theapi.apis.ItemCreatorAPI;
 import me.devtec.theapi.utils.datakeeper.Data;
+import me.devtec.theapi.utils.datakeeper.User;
 
 public class Arena {
 	public Location spawn;
@@ -50,6 +51,16 @@ public class Arena {
     }
     
     public void notifyDeath(Player dead) {
-    	
+    	Player killer = KnockEvents.lastHit.get(dead);
+    	if(killer!=null) {
+    		TheAPI.msg("&cYou killed player &e"+dead.getName(), killer);
+    		TheAPI.msg("&cYou was killed by player &e"+killer.getName(), dead);
+        	User user = TheAPI.getUser(killer);
+        	user.setAndSave("kbffa.kills", user.getInt("kbffa.kills")+1);
+    	}else {
+    		TheAPI.msg("&cYou dead", dead);
+    	}
+    	User user = TheAPI.getUser(dead);
+    	user.setAndSave("kbffa.deaths", user.getInt("kbffa.deaths")+1);
     }
 }
