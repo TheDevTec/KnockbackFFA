@@ -57,37 +57,12 @@ public class KnockEvents implements Listener {
     @EventHandler
     public void onBlockyEvenTi(BlockPlaceEvent e){
         blocky.put(e.getBlock().getLocation(),new BlockStateRemove(e.getPlayer()));
-        new Tasker(){
-            @Override
-            public void run() {
-                if(e.getBlock().getType().equals(Material.WHITE_TERRACOTTA)){
-                    BlocksAPI.set(e.getBlock(),Material.YELLOW_TERRACOTTA);
-                    return;
-                }
-                if(e.getBlock().getType().equals(Material.YELLOW_TERRACOTTA)){
-                    BlocksAPI.set(e.getBlock(),Material.ORANGE_TERRACOTTA);
-                    return;
-                }
-                if(e.getBlock().getType().equals(Material.ORANGE_TERRACOTTA)){
-                    BlocksAPI.set(e.getBlock(),Material.RED_TERRACOTTA);
-                    return;
-                }
-                if(e.getBlock().getType().equals(Material.PINK_TERRACOTTA)){
-                    BlocksAPI.set(e.getBlock(),Material.LIGHT_BLUE_TERRACOTTA);
-                    return;
-                }
-                if(e.getBlock().getType().equals(Material.RED_TERRACOTTA)){
-                    BlocksAPI.set(e.getBlock(), Material.AIR);
-                    TheAPI.giveItem(e.getPlayer(), ItemCreatorAPI.create(Material.WHITE_TERRACOTTA,1,"&cBlocks"));
-                    blocky.remove(e.getBlock().getLocation());
-                }
-            }
-        }.runRepeating(40,40);
     }
 }
 class BlockStateRemove {
     Player player;
     boolean giveBack=true;
+    int i;
     public BlockStateRemove(Player p){
         player=p;
     }
