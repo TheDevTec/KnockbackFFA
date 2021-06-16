@@ -68,8 +68,8 @@ public class Loader extends JavaPlugin {
 					}
 					if(r.i==4){
 						BlocksAPI.set(l.getBlock(), Material.AIR);
-						if(KnockEvents.blocky.get(l).giveBack)
-							TheAPI.giveItem(KnockEvents.blocky.get(l).player, ItemCreatorAPI.create(Material.WHITE_TERRACOTTA,1,"&cBlocks"));
+						if(r.giveBack)
+							TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.WHITE_TERRACOTTA,1,"&cBlocks"));
 						remove.add(l);
 					}
 				}
