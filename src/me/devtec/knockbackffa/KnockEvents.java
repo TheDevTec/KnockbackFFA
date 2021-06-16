@@ -1,11 +1,9 @@
 package me.devtec.knockbackffa;
 
-import me.devtec.theapi.TheAPI;
-import me.devtec.theapi.apis.ItemCreatorAPI;
-import me.devtec.theapi.blocksapi.BlocksAPI;
-import me.devtec.theapi.scheduler.Tasker;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,9 +14,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class KnockEvents implements Listener {
     protected static Map<Location, BlockStateRemove> blocky = new HashMap<>();
@@ -55,11 +50,12 @@ public class KnockEvents implements Listener {
 
 
     @EventHandler
-    public void onBlockyEvenTi(BlockPlaceEvent e){
+    public void onPlace(BlockPlaceEvent e){
         blocky.put(e.getBlock().getLocation(),new BlockStateRemove(e.getPlayer()));
     }
 }
-class BlockStateRemove {
+
+ class BlockStateRemove {
     Player player;
     boolean giveBack=true;
     int i;
