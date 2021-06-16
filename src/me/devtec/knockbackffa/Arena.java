@@ -48,4 +48,8 @@ public class Arena {
     public ItemStack[] getItemStacks() {
         return itemStacks;
     }
+    
+    public void notifyDeath(Player dead) {
+    	
+    }
 }
