@@ -62,5 +62,7 @@ public class Arena {
     	}
     	User user = TheAPI.getUser(dead);
     	user.setAndSave("kbffa.deaths", user.getInt("kbffa.deaths")+1);
+    	for(BlockStateRemove r : KnockEvents.blocky.values())
+    		if(r.player.equals(dead))r.giveBack=false;
     }
 }
