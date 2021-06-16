@@ -17,7 +17,9 @@ public class Loader extends JavaPlugin {
 	public void onEnable() {
 		Bukkit.getPluginManager().registerEvents(new KnockEvents(), this);
 		//load aren do mapy
-		for(File f : new File("plugins/KnockbackFFA/Arenas").listFiles())
+		File fr = new File("plugins/KnockbackFFA/Arenas");
+		if(!fr.exists())fr.mkdir();
+		for(File f : fr.listFiles())
 			API.arenas.put(f.getName().substring(0, f.getName().length()-5), new Arena(new Data(f)));
 		
 		Arena arena = API.nextArena(); //load prvni areny
