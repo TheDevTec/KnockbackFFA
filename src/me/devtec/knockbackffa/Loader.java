@@ -27,13 +27,16 @@ public class Loader extends JavaPlugin {
 		File fr = new File("plugins/KnockbackFFA/Arenas");
 		if(!fr.exists())fr.mkdirs();
 		for(File f : fr.listFiles())
-			API.arenas.put(f.getName().substring(0, f.getName().length()-5), new Arena(new Data(f)));
+			API.arenas.put(f.getName().substring(0, f.getName().length()-4), new Arena(new Data(f)));
 		
 		Arena arena = API.nextArena(); //load prvni areny
 		//teleport online hraci do areny
 		if(arena!=null)
 		for(Player p : TheAPI.getOnlinePlayers())
 			p.teleport(arena.spawn);
+		
+		TheAPI.createAndRegisterCommand("knockbackffa", "knockbackffa.command", new KBFFACmd(), "kbffa");
+		
 		//task na change areny
 		arenaChangeTask=new Tasker() {
 			public void run() {
