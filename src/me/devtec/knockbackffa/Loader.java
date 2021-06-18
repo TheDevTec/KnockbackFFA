@@ -84,7 +84,7 @@ public class Loader extends JavaPlugin {
 				}
 				remove.clear();
 			}
-		}.runRepeating(0,10);
+		}.runRepeating(0,3);
 	}
 	
 	public void onDisable() {

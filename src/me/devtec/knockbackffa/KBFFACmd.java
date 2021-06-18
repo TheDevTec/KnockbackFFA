@@ -50,6 +50,15 @@ public class KBFFACmd implements CommandExecutor {
 			TheAPI.msg("&eDeleted arena "+args[1], s);
 			return true;
 		}
+		if(args[0].equalsIgnoreCase("setspawn")){
+
+		}
+		if(args[0].equalsIgnoreCase("teleport")){
+
+		}
+		if(args[0].equalsIgnoreCase("nextarena")){
+
+		}
 		return true;
 	}
 
