@@ -83,10 +83,6 @@ public class KBFFACmd implements CommandExecutor {
 			return true;
 		}
 		if(args[0].equalsIgnoreCase("nextarena")){
-			if(args.length==1){
-				TheAPI.msg("&e/KBFFA Nextarena", s);
-				return true;
-			}
 			API.arena.moveAll(API.nextArena());
 			return true;
 		}
