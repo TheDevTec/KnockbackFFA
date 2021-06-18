@@ -22,6 +22,7 @@ public class KBFFACmd implements CommandExecutor {
 			TheAPI.msg("&e/KBFFA Delete <name>", s);
 			TheAPI.msg("&e/KBFFA SetSpawn <name>", s);
 			TheAPI.msg("&e/KBFFA Teleport <name>", s);
+			TheAPI.msg("&e/KBFFA NextArena", s);
 			TheAPI.msg("&e/KBFFA List", s);
 			return true;
 		}
