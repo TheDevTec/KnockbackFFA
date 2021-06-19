@@ -3,29 +3,31 @@ package me.devtec.knockbackffa;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.devtec.theapi.TheAPI;
-import me.devtec.theapi.apis.ItemCreatorAPI;
-import me.devtec.theapi.blocksapi.BlocksAPI;
-import me.devtec.theapi.scheduler.Tasker;
 import org.bukkit.Material;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityAirChangeEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 
 import me.devtec.theapi.utils.Position;
-import org.bukkit.util.Vector;
 
 public class KnockEvents implements Listener {
     protected static Map<Position, BlockStateRemove> blocky = new HashMap<>();
+    protected static Map<Position, BlockStateRemove> jumps = new HashMap<>();
     protected static Map<Player, Player> lastHit = new HashMap<>();
     
     @EventHandler
@@ -36,16 +38,31 @@ public class KnockEvents implements Listener {
 
     @EventHandler
     public void onHit(EntityDamageEvent e) {
-        if(e.getCause()==DamageCause.ENTITY_ATTACK)return;
+    	if(API.arena.dead.contains(e.getEntity()))e.setCancelled(true);
+        if(e.getCause()==DamageCause.ENTITY_ATTACK||e.getCause()==DamageCause.PROJECTILE)return;
+        if(e.getCause()==DamageCause.VOID||e.getCause()==DamageCause.LAVA||e.getCause()==DamageCause.FIRE||e.getCause()==DamageCause.FIRE_TICK) {
+        	API.arena.notifyDeath((Player)e.getEntity());
+        }
         e.setCancelled(true);
     }
 
     @EventHandler
     public void onHitByPlayer(EntityDamageByEntityEvent e) {
         if(e.getEntity()instanceof Player) {
-            e.setDamage(0);
-            if(e.getDamager() instanceof Player)
-            lastHit.put((Player)e.getEntity(), (Player)e.getDamager());
+            if(e.getDamager() instanceof Player) {
+	            lastHit.put((Player)e.getEntity(), (Player)e.getDamager());
+	    		if(((Damageable) e.getEntity()).getHealth()-0.5<=0) {
+	    			API.arena.notifyDeath((Player) e.getEntity());
+	    		}else
+	    			e.setDamage(0.5);
+            }else if(e.getDamager() instanceof Projectile) {
+            	if((Player)((Projectile)e.getDamager()).getShooter()==e.getEntity())return;
+	                lastHit.put((Player)e.getEntity(), (Player)((Projectile)e.getDamager()).getShooter());
+        		if(((Damageable) e.getEntity()).getHealth()-10<=0) {
+        			API.arena.notifyDeath((Player) e.getEntity());
+        		}else
+        			e.setDamage(10);
+        	}
         }
     }
 
@@ -55,23 +72,27 @@ public class KnockEvents implements Listener {
     }
 
     @EventHandler
+    public void onFoodChange(EntityRegainHealthEvent e) {
+    	if(!((Player)e.getEntity()).hasPotionEffect(PotionEffectType.REGENERATION))
+        e.setCancelled(true);
+    }
+
+    @EventHandler
     public void onFoodChange(EntityAirChangeEvent e) {
         e.setCancelled(true);
     }
 
+    @EventHandler
+    public void onFoodChange(BlockBreakEvent e) {
+        e.setCancelled(true);
+    }
 
     @EventHandler
     public void onPlace(BlockPlaceEvent e){
         if(e.getBlock().getType().equals(Material.WHITE_TERRACOTTA))
-            blocky.put(new Position(e.getBlock().getLocation()),new BlockStateRemove(e.getPlayer()));
+            blocky.put(new Position(e.getBlock().getLocation()),new BlockStateRemove(e.getPlayer(),3));
         if(e.getBlock().getType().equals(Material.LIGHT_WEIGHTED_PRESSURE_PLATE)){
-            new Tasker(){
-                @Override
-                public void run() {
-                    BlocksAPI.set(e.getBlock(), Material.AIR);
-                    TheAPI.giveItem(e.getPlayer(), ItemCreatorAPI.create(Material.LIGHT_WEIGHTED_PRESSURE_PLATE,1,"&eJumpPad"));
-                }
-            }.runLater(15*20);
+        	jumps.put(new Position(e.getBlock().getLocation()), new BlockStateRemove(e.getPlayer(),15));
         }
     }
     @EventHandler
@@ -87,9 +108,12 @@ public class KnockEvents implements Listener {
  class BlockStateRemove {
     Player player;
     boolean giveBack=true;
-    long placeTime = System.currentTimeMillis()/1000+5;
+    long placeTime;
+    int tickTime;
     int i;
-    public BlockStateRemove(Player p){
+    public BlockStateRemove(Player p,int time){
         player=p;
+        tickTime=time;
+        placeTime=System.currentTimeMillis()/1000+time;
     }
 }

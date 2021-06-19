@@ -50,7 +50,7 @@ public class Loader extends JavaPlugin {
 					Position l=ll.getKey();
 					BlockStateRemove r = ll.getValue();
 					if(r.placeTime-System.currentTimeMillis()/1000<=0) {
-						r.placeTime=System.currentTimeMillis()/1000+5;
+						r.placeTime=System.currentTimeMillis()/1000+r.tickTime;
 						if(r.i==0){
 							++r.i;
 							BlocksAPI.set(l,Material.YELLOW_TERRACOTTA);
@@ -79,9 +79,22 @@ public class Loader extends JavaPlugin {
 						}
 					}
 				}
-				for(Position s:remove){
+				for(Position s:remove)
 					KnockEvents.blocky.remove(s);
+				remove.clear();
+
+				for(Entry<Position, BlockStateRemove> ll:KnockEvents.jumps.entrySet()){
+					Position l=ll.getKey();
+					BlockStateRemove r = ll.getValue();
+					if(r.placeTime-System.currentTimeMillis()/1000<=0) {
+						BlocksAPI.set(l, Material.AIR);
+						if(r.giveBack)
+		                    TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.LIGHT_WEIGHTED_PRESSURE_PLATE,1,"&eJumpPad"));
+						remove.add(l);
+					}
 				}
+				for(Position s:remove)
+					KnockEvents.jumps.remove(s);
 				remove.clear();
 			}
 		}.runRepeating(0,3);
