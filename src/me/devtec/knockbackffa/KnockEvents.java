@@ -24,6 +24,7 @@ import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerPickupArrowEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -102,6 +103,11 @@ public class KnockEvents implements Listener {
     }
 
     @EventHandler
+    public void onFoodChange(PlayerPickupArrowEvent e) {
+        e.setCancelled(true);
+    }
+
+    @EventHandler
     public void onFoodChange(PlayerDropItemEvent e) {
         e.setCancelled(true);
     }
@@ -114,7 +120,7 @@ public class KnockEvents implements Listener {
     @EventHandler
     public void onFoodChange(EntityRegainHealthEvent e) {
     	if(!((Player)e.getEntity()).hasPotionEffect(PotionEffectType.REGENERATION))
-        e.setCancelled(true);
+    		e.setCancelled(true);
     }
 
     @EventHandler
