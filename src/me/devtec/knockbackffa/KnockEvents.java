@@ -22,6 +22,7 @@ public class KnockEvents implements Listener {
     
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
+    	if(API.arena!=null)
         API.arena.join(e.getPlayer());
     }
 

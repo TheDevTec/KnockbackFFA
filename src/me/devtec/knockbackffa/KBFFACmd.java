@@ -66,7 +66,7 @@ public class KBFFACmd implements CommandExecutor {
 			Location l = ((Player)s).getLocation();
 			API.arenas.get(args[1]).spawn=l;
 			Data d = new Data("plugins/KnockbackFFA/Arenas/"+args[1]+".yml");
-			d.set("Spawn",l);
+			d.set("spawn",l);
 			d.save(DataType.YAML);
 			TheAPI.msg("&eSpawn set for arena &b"+args[1]+" &eat &9"+ StringUtils.fixedFormatDouble(l.getX())+" "+StringUtils.fixedFormatDouble(l.getY())+" "+StringUtils.fixedFormatDouble(l.getZ()), s);
 			return true;
