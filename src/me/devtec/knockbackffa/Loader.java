@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import me.devtec.theapi.placeholderapi.ThePlaceholder;
-import me.devtec.theapi.placeholderapi.ThePlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -15,6 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import me.devtec.theapi.TheAPI;
 import me.devtec.theapi.apis.ItemCreatorAPI;
 import me.devtec.theapi.blocksapi.BlocksAPI;
+import me.devtec.theapi.placeholderapi.ThePlaceholder;
 import me.devtec.theapi.scheduler.Scheduler;
 import me.devtec.theapi.scheduler.Tasker;
 import me.devtec.theapi.utils.Position;
