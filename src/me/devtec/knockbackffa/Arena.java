@@ -14,12 +14,15 @@ import org.bukkit.potion.PotionEffectType;
 
 import me.devtec.theapi.TheAPI;
 import me.devtec.theapi.apis.ItemCreatorAPI;
+import me.devtec.theapi.blocksapi.BlocksAPI;
 import me.devtec.theapi.scheduler.Tasker;
+import me.devtec.theapi.utils.Position;
 import me.devtec.theapi.utils.datakeeper.Data;
 import me.devtec.theapi.utils.datakeeper.User;
 
 public class Arena {
 	public Location spawn;
+	public Position a,b;
 	public ItemStack[] itemStacks =
             Arrays.asList(
                     addEnchants(ItemCreatorAPI.create(Material.STICK, 1, "&cKnockback stick")),
@@ -31,6 +34,8 @@ public class Arena {
 
     public Arena(Data data) {
     	spawn=data.getAs("spawn", Location.class);
+    	a=data.getAs("a", Position.class);
+    	b=data.getAs("b", Position.class);
 	}
 
 	private ItemStack addEnchants(ItemStack create) {
@@ -42,12 +47,17 @@ public class Arena {
 		create.addUnsafeEnchantment(Enchantment.ARROW_KNOCKBACK, 2);
 		return create;
 	}
-
-	public void join(Player target) {
-    	target.teleport(spawn);
-    	target.getInventory().clear();
-    	for(ItemStack st : itemStacks)
-    		target.getInventory().addItem(st.clone());
+	
+	public boolean isInRegion(Location loc) {
+		return BlocksAPI.isInside(new Position(loc), a, b);
+	}
+	
+	public void join(Player dead) {
+    	dead.teleport(spawn);
+    	dead.setHealth(20);
+    	dead.setFireTicks(-20);
+    	dead.getInventory().clear();
+    	dead.getInventory().setContents(itemStacks);
     }
 
     public void moveAll(Arena arena) {
@@ -74,12 +84,12 @@ public class Arena {
     	if(killer!=null) {
     		killer.getInventory().addItem(itemStacks[2]);
     		killer.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 40, 3, false, false));
-    		TheAPI.msg("&cYou killed player &e"+dead.getName(), killer);
-    		TheAPI.msg("&cYou was killed by player &e"+killer.getName(), dead);
+    		TheAPI.msg("&b▪&8| &bKBFFA &8› &7Zabil jsi hrace &b"+dead.getName(), killer);
+    		TheAPI.msg("&b▪&8| &bKBFFA &8› &7Byl jsi zabit hracem &b"+killer.getName(), dead);
         	User user = TheAPI.getUser(killer);
         	user.setAndSave("kbffa.kills", user.getInt("kbffa.kills")+1);
     	}else {
-    		TheAPI.msg("&cYou dead", dead);
+    		TheAPI.msg("&b▪&8| &bKBFFA &8› &7Zemrel jsi", dead);
     	}
     	User user = TheAPI.getUser(dead);
     	user.setAndSave("kbffa.deaths", user.getInt("kbffa.deaths")+1);

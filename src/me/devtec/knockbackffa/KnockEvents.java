@@ -18,7 +18,9 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -28,6 +30,7 @@ import org.bukkit.util.Vector;
 
 import me.devtec.theapi.utils.Position;
 
+@SuppressWarnings("deprecation")
 public class KnockEvents implements Listener {
     protected static Map<Position, BlockStateRemove> blocky = new HashMap<>();
     protected static Map<Position, BlockStateRemove> jumps = new HashMap<>();
@@ -41,6 +44,8 @@ public class KnockEvents implements Listener {
 
     @EventHandler
     public void onHit(EntityDamageEvent e) {
+        if(API.arena.isInRegion(e.getEntity().getLocation()))
+        	e.setCancelled(true);
     	if(API.arena.dead.contains(e.getEntity()))e.setCancelled(true);
         if(e.getCause()==DamageCause.ENTITY_ATTACK||e.getCause()==DamageCause.PROJECTILE)return;
         if(e.getCause()==DamageCause.VOID||e.getCause()==DamageCause.LAVA||e.getCause()==DamageCause.FIRE||e.getCause()==DamageCause.FIRE_TICK) {
@@ -51,6 +56,15 @@ public class KnockEvents implements Listener {
 
     @EventHandler
     public void onHitByPlayer(EntityDamageByEntityEvent e) {
+        if(API.arena.isInRegion(e.getEntity().getLocation()))
+        	e.setCancelled(true);
+        if(e.getDamager() instanceof Projectile)
+        	if(API.arena.isInRegion(((Player)((Projectile)e.getDamager()).getShooter()).getLocation()))
+        		e.setCancelled(true);
+        	else
+        if(API.arena.isInRegion(e.getDamager().getLocation()))
+        	e.setCancelled(true);
+        
         if(e.getEntity()instanceof Player) {
             if(e.getDamager() instanceof Player) {
 	            lastHit.put((Player)e.getEntity(), (Player)e.getDamager());
@@ -59,7 +73,10 @@ public class KnockEvents implements Listener {
 	    		}else
 	    			e.setDamage(0.5);
             }else if(e.getDamager() instanceof Projectile) {
-            	if((Player)((Projectile)e.getDamager()).getShooter()==e.getEntity())return;
+            	if((Player)((Projectile)e.getDamager()).getShooter()==e.getEntity()) {
+            		e.setCancelled(true);
+            		return;
+            	}
 	                lastHit.put((Player)e.getEntity(), (Player)((Projectile)e.getDamager()).getShooter());
         		if(((Damageable) e.getEntity()).getHealth()-10<=0) {
         			API.arena.notifyDeath((Player) e.getEntity());
@@ -106,12 +123,26 @@ public class KnockEvents implements Listener {
     }
 
     @EventHandler
+    public void onFoodChange(PlayerChatEvent e) {
+    	e.setFormat(e.getPlayer().getName()+" §8> §7"+e.getMessage());
+    }
+
+    @EventHandler
     public void onFoodChange(BlockBreakEvent e) {
         e.setCancelled(true);
     }
 
     @EventHandler
+    public void onFoodChange(EntityShootBowEvent e) {
+        e.setCancelled(true);
+    }
+
+    @EventHandler
     public void onPlace(BlockPlaceEvent e){
+        if(API.arena.isInRegion(e.getBlock().getLocation())) {
+        	e.setCancelled(true);
+        	return;
+        }
         if(e.getBlock().getType().equals(Material.WHITE_TERRACOTTA))
             blocky.put(new Position(e.getBlock().getLocation()),new BlockStateRemove(e.getPlayer(),3));
         if(e.getBlock().getType().equals(Material.LIGHT_WEIGHTED_PRESSURE_PLATE)){
@@ -122,7 +153,7 @@ public class KnockEvents implements Listener {
     public void onLaunchpad(PlayerInteractEvent e){
         if(e.getAction()== Action.PHYSICAL){
             if(e.getClickedBlock().getType().equals(Material.LIGHT_WEIGHTED_PRESSURE_PLATE)){
-                e.getPlayer().setVelocity(e.getPlayer().getVelocity().add(new Vector(0,2,0)));
+                e.getPlayer().setVelocity(e.getPlayer().getLocation().getDirection().normalize().add(new Vector(0,1.25,0)));
             }
         }
     }

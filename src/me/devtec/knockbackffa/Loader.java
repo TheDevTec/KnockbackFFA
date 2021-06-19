@@ -13,7 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import me.devtec.theapi.TheAPI;
 import me.devtec.theapi.apis.ItemCreatorAPI;
 import me.devtec.theapi.blocksapi.BlocksAPI;
-import me.devtec.theapi.placeholderapi.ThePlaceholder;
+import me.devtec.theapi.placeholderapi.PlaceholderRegister;
 import me.devtec.theapi.scheduler.Scheduler;
 import me.devtec.theapi.scheduler.Tasker;
 import me.devtec.theapi.utils.Position;
@@ -73,6 +73,7 @@ public class Loader extends JavaPlugin {
 							continue;
 						}
 						if(r.i==4){
+							++r.i;
 							BlocksAPI.set(l, Material.AIR);
 							if(r.giveBack)
 								TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.WHITE_TERRACOTTA,1,"&cBlocks"));
@@ -99,11 +100,11 @@ public class Loader extends JavaPlugin {
 				remove.clear();
 			}
 		}.runRepeating(0,3);
-		new ThePlaceholder("kbffa"){
+		new PlaceholderRegister("kbffa","DevTec","1.0") {
 			public String onRequest(Player player, String s) {
-				if(s.equalsIgnoreCase("kbffa_kills"))
+				if(s.equalsIgnoreCase("kills"))
 				return TheAPI.getUser(player).getString("kbffa.kills");
-				if(s.equalsIgnoreCase("kbffa_deaths"))
+				if(s.equalsIgnoreCase("deaths"))
 				return TheAPI.getUser(player).getString("kbffa.deaths");
 				return null;
 			}

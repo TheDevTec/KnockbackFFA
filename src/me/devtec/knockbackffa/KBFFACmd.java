@@ -2,16 +2,17 @@ package me.devtec.knockbackffa;
 
 import java.io.File;
 
-import me.devtec.theapi.utils.StringUtils;
-import me.devtec.theapi.utils.datakeeper.DataType;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import me.devtec.theapi.TheAPI;
+import me.devtec.theapi.utils.Position;
+import me.devtec.theapi.utils.StringUtils;
 import me.devtec.theapi.utils.datakeeper.Data;
-import org.bukkit.entity.Player;
+import me.devtec.theapi.utils.datakeeper.DataType;
 
 public class KBFFACmd implements CommandExecutor {
 
@@ -71,6 +72,38 @@ public class KBFFACmd implements CommandExecutor {
 			TheAPI.msg("&eSpawn set for arena &b"+args[1]+" &eat &9"+ StringUtils.fixedFormatDouble(l.getX())+" "+StringUtils.fixedFormatDouble(l.getY())+" "+StringUtils.fixedFormatDouble(l.getZ()), s);
 			return true;
 		}
+		if(args[0].equalsIgnoreCase("pos1")){
+			if(!(s instanceof Player))return true;
+			if(args.length==1){
+				TheAPI.msg("&e/KBFFA Pos1 <name>", s);
+				return true;
+			}
+			if(!API.arenas.containsKey(args[1])){
+				TheAPI.msg("&eArena "+args[1]+" not exist", s);return true;}
+			Location l = ((Player)s).getLocation();
+			API.arenas.get(args[1]).spawn=l;
+			Data d = new Data("plugins/KnockbackFFA/Arenas/"+args[1]+".yml");
+			d.set("a",new Position(l));
+			d.save(DataType.YAML);
+			TheAPI.msg("&eRegion position #1 set for arena &b"+args[1]+" &eat &9"+ StringUtils.fixedFormatDouble(l.getX())+" "+StringUtils.fixedFormatDouble(l.getY())+" "+StringUtils.fixedFormatDouble(l.getZ()), s);
+			return true;
+		}
+		if(args[0].equalsIgnoreCase("pos2")){
+			if(!(s instanceof Player))return true;
+			if(args.length==1){
+				TheAPI.msg("&e/KBFFA Pos2 <name>", s);
+				return true;
+			}
+			if(!API.arenas.containsKey(args[1])){
+				TheAPI.msg("&eArena "+args[1]+" not exist", s);return true;}
+			Location l = ((Player)s).getLocation();
+			API.arenas.get(args[1]).spawn=l;
+			Data d = new Data("plugins/KnockbackFFA/Arenas/"+args[1]+".yml");
+			d.set("b",new Position(l));
+			d.save(DataType.YAML);
+			TheAPI.msg("&eRegion position #2 set for arena &b"+args[1]+" &eat &9"+ StringUtils.fixedFormatDouble(l.getX())+" "+StringUtils.fixedFormatDouble(l.getY())+" "+StringUtils.fixedFormatDouble(l.getZ()), s);
+			return true;
+		}
 		if(args[0].equalsIgnoreCase("teleport")){
 			if(!(s instanceof Player))return true;
 			if(args.length==1){
@@ -85,6 +118,12 @@ public class KBFFACmd implements CommandExecutor {
 		}
 		if(args[0].equalsIgnoreCase("nextarena")){
 			API.arena.moveAll(API.nextArena());
+			return true;
+		}
+		if(args[0].equalsIgnoreCase("list")){
+			TheAPI.msg("&eList of arenas:", s);
+			for(String ds : API.arenas.keySet())
+				TheAPI.msg("&6- "+ds, s);
 			return true;
 		}
 		return true;
