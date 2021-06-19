@@ -36,6 +36,7 @@ public class KnockEvents implements Listener {
     public void onHitByPlayer(EntityDamageByEntityEvent e) {
         if(e.getEntity()instanceof Player) {
             e.setDamage(0);
+            if(e.getDamager() instanceof Player)
             lastHit.put((Player)e.getEntity(), (Player)e.getDamager());
         }
     }
