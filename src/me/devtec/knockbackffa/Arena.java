@@ -25,7 +25,7 @@ public class Arena {
                     ItemCreatorAPI.create(Material.WHITE_TERRACOTTA, 64, "&cBlocks")).toArray(new ItemStack[0]);
 
     public Arena(Data data) {
-    	spawn=data.getAs("spawn", Location.class);
+    	spawn=data.getAs("Spawn", Location.class);
 	}
 
 	private ItemStack addEnchants(ItemStack create) {
