@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import me.devtec.theapi.placeholderapi.ThePlaceholder;
+import me.devtec.theapi.placeholderapi.ThePlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -98,6 +100,16 @@ public class Loader extends JavaPlugin {
 				remove.clear();
 			}
 		}.runRepeating(0,3);
+		new ThePlaceholder("kbffa_kills"){
+			public String onRequest(Player player, String s) {
+				return TheAPI.getUser(player).getString("kbffa.kills");
+			}
+		}.register();
+		new ThePlaceholder("kbffa_deaths"){
+			public String onRequest(Player player, String s) {
+				return TheAPI.getUser(player).getString("kbffa.deaths");
+			}
+		}.register();
 	}
 	
 	public void onDisable() {
