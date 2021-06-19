@@ -103,9 +103,9 @@ public class Loader extends JavaPlugin {
 		new PlaceholderRegister("kbffa","DevTec","1.0") {
 			public String onRequest(Player player, String s) {
 				if(s.equalsIgnoreCase("kills"))
-				return TheAPI.getUser(player).getString("kbffa.kills");
+				return TheAPI.getUser(player).getInt("kbffa.kills")+"";
 				if(s.equalsIgnoreCase("deaths"))
-				return TheAPI.getUser(player).getString("kbffa.deaths");
+				return TheAPI.getUser(player).getInt("kbffa.deaths")+"";
 				return null;
 			}
 		}.register();

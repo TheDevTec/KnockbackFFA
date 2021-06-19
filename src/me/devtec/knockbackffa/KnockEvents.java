@@ -134,6 +134,7 @@ public class KnockEvents implements Listener {
 
     @EventHandler
     public void onFoodChange(EntityShootBowEvent e) {
+        if(API.arena.isInRegion(e.getEntity().getLocation()))
         e.setCancelled(true);
     }
 
