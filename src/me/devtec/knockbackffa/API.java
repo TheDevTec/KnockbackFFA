@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import me.devtec.theapi.TheAPI;
-import me.devtec.theapi.placeholderapi.ThePlaceholderAPI;
 
 public class API {
     protected static Map<String, Arena> arenas = new HashMap<>();

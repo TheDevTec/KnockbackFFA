@@ -23,7 +23,7 @@ public class Arena {
 	public ItemStack[] itemStacks =
             Arrays.asList(
                     addEnchants(ItemCreatorAPI.create(Material.STICK, 1, "&cKnockback stick")),
-                    ItemCreatorAPI.create(Material.BOW, 1, "&3Luk"),
+                    addEnchants2(ItemCreatorAPI.create(Material.BOW, 1, "&3Luk")),
                     ItemCreatorAPI.create(Material.ARROW, 1, "&7Šíp"),
                     ItemCreatorAPI.create(Material.ENDER_PEARL, 1, "&5Ender Pearl"),
                     ItemCreatorAPI.create(Material.LIGHT_WEIGHTED_PRESSURE_PLATE, 1, "&eJumpPad"),
@@ -35,6 +35,11 @@ public class Arena {
 
 	private ItemStack addEnchants(ItemStack create) {
 		create.addUnsafeEnchantment(Enchantment.KNOCKBACK, 5);
+		return create;
+	}
+
+	private ItemStack addEnchants2(ItemStack create) {
+		create.addUnsafeEnchantment(Enchantment.ARROW_KNOCKBACK, 2);
 		return create;
 	}
 

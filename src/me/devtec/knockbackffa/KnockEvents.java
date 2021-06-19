@@ -15,9 +15,11 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityAirChangeEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.potion.PotionEffectType;
@@ -64,6 +66,16 @@ public class KnockEvents implements Listener {
         			e.setDamage(10);
         	}
         }
+    }
+
+    @EventHandler
+    public void onFoodChange(EntityPickupItemEvent e) {
+        e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onFoodChange(PlayerDropItemEvent e) {
+        e.setCancelled(true);
     }
 
     @EventHandler
