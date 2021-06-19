@@ -99,14 +99,13 @@ public class Loader extends JavaPlugin {
 				remove.clear();
 			}
 		}.runRepeating(0,3);
-		new ThePlaceholder("kbffa_kills"){
+		new ThePlaceholder("kbffa"){
 			public String onRequest(Player player, String s) {
+				if(s.equalsIgnoreCase("kbffa_kills"))
 				return TheAPI.getUser(player).getString("kbffa.kills");
-			}
-		}.register();
-		new ThePlaceholder("kbffa_deaths"){
-			public String onRequest(Player player, String s) {
+				if(s.equalsIgnoreCase("kbffa_deaths"))
 				return TheAPI.getUser(player).getString("kbffa.deaths");
+				return null;
 			}
 		}.register();
 	}

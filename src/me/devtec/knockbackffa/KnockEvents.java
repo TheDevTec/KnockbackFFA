@@ -22,6 +22,7 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
@@ -66,6 +67,16 @@ public class KnockEvents implements Listener {
         			e.setDamage(10);
         	}
         }
+    }
+
+    @EventHandler
+    public void onFoodChange(PlayerJoinEvent e) {
+        e.setJoinMessage("");
+    }
+
+    @EventHandler
+    public void onFoodChange(PlayerQuitEvent e) {
+        e.setQuitMessage("");
     }
 
     @EventHandler
