@@ -154,7 +154,7 @@ public class KnockEvents implements Listener {
     public void onLaunchpad(PlayerInteractEvent e){
         if(e.getAction()== Action.PHYSICAL){
             if(e.getClickedBlock().getType().equals(Material.LIGHT_WEIGHTED_PRESSURE_PLATE)){
-                e.getPlayer().setVelocity(e.getPlayer().getLocation().getDirection().normalize().add(new Vector(0,1.25,0)));
+                e.getPlayer().setVelocity(e.getPlayer().getLocation().getDirection().normalize().add(new Vector(0,1.75,0)));
             }
         }
     }
