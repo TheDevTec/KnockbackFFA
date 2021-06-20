@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -146,14 +147,10 @@ public class KnockEvents implements Listener {
 
     @EventHandler
     public void onPlace(BlockPlaceEvent e){
-        if(API.arena.isInRegion(e.getBlock().getLocation())) {
-        	e.setCancelled(true);
-        	return;
-        }
         if(e.getBlock().getType().equals(Material.WHITE_TERRACOTTA))
             blocky.put(new Position(e.getBlock().getLocation()),new BlockStateRemove(e.getPlayer(),3));
         if(e.getBlock().getType().equals(Material.LIGHT_WEIGHTED_PRESSURE_PLATE)){
-        	jumps.put(new Position(e.getBlock().getLocation()), new BlockStateRemove(e.getPlayer(),15));
+        	jumps.put(new Position(e.getBlock().getLocation()), new BlockStateRemove(e.getPlayer(),10));
         }
     }
     @EventHandler
@@ -162,6 +159,11 @@ public class KnockEvents implements Listener {
             if(e.getClickedBlock().getType().equals(Material.LIGHT_WEIGHTED_PRESSURE_PLATE)){
                 e.getPlayer().setVelocity(e.getPlayer().getLocation().getDirection().normalize().add(new Vector(0,1.75,0)));
             }
+        }
+        if(API.arena.isInRegion(e.getClickedBlock().getLocation())) {
+        	e.setCancelled(true);
+        	e.setUseItemInHand(Result.DENY);
+        	e.setUseInteractedBlock(Result.DENY);
         }
     }
 }

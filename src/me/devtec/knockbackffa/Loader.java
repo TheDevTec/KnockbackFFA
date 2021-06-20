@@ -1,8 +1,8 @@
 package me.devtec.knockbackffa;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
@@ -12,7 +12,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import me.devtec.theapi.TheAPI;
 import me.devtec.theapi.apis.ItemCreatorAPI;
-import me.devtec.theapi.blocksapi.BlocksAPI;
 import me.devtec.theapi.placeholderapi.PlaceholderRegister;
 import me.devtec.theapi.scheduler.Scheduler;
 import me.devtec.theapi.scheduler.Tasker;
@@ -45,59 +44,58 @@ public class Loader extends JavaPlugin {
 			}
 		}.runRepeating(20*60*15, 20*60*15);
 		new Tasker(){
-			List<Position>remove=new ArrayList<>();
 			public void run() {
-				for(Entry<Position, BlockStateRemove> ll:KnockEvents.blocky.entrySet()){
-					Position l=ll.getKey();
-					BlockStateRemove r = ll.getValue();
-					if(r.placeTime-System.currentTimeMillis()/1000<=0) {
-						r.placeTime=System.currentTimeMillis()/1000+r.tickTime;
-						if(r.i==0){
-							++r.i;
-							BlocksAPI.set(l,Material.YELLOW_TERRACOTTA);
-							continue;
+				try {
+					Iterator<Entry<Position, BlockStateRemove>> e = new HashSet<>(KnockEvents.blocky.entrySet()).iterator();
+					while(e.hasNext()) {
+						Entry<Position,BlockStateRemove> ll = e.next();
+						Position l=ll.getKey();
+						BlockStateRemove r = ll.getValue();
+						if(r.placeTime-System.currentTimeMillis()/1000<=0) {
+							r.placeTime=System.currentTimeMillis()/1000+r.tickTime;
+							if(r.i==0){
+								++r.i;
+								l.setTypeAndUpdate(Material.YELLOW_TERRACOTTA);
+								continue;
+							}
+							if(r.i==1){
+								++r.i;
+								l.setTypeAndUpdate(Material.ORANGE_TERRACOTTA);
+								continue;
+							}
+							if(r.i==2){
+								++r.i;
+								l.setTypeAndUpdate(Material.PINK_TERRACOTTA);
+								continue;
+							}
+							if(r.i==3){
+								++r.i;
+								l.setTypeAndUpdate(Material.RED_TERRACOTTA);
+								continue;
+							}
+							if(r.i==4){
+								l.setAirAndUpdate();
+								if(r.giveBack)
+									TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.WHITE_TERRACOTTA,1,"&cBlocky"));
+								KnockEvents.blocky.remove(l);
+							}
 						}
-						if(r.i==1){
-							++r.i;
-							BlocksAPI.set(l,Material.ORANGE_TERRACOTTA);
-							continue;
-						}
-						if(r.i==2){
-							++r.i;
-							BlocksAPI.set(l,Material.PINK_TERRACOTTA);
-							continue;
-						}
-						if(r.i==3){
-							++r.i;
-							BlocksAPI.set(l,Material.RED_TERRACOTTA);
-							continue;
-						}
-						if(r.i==4){
-							++r.i;
-							BlocksAPI.set(l, Material.AIR);
+					}
+					e = new HashSet<>(KnockEvents.jumps.entrySet()).iterator();
+					while(e.hasNext()) {
+						Entry<Position,BlockStateRemove> ll = e.next();
+						Position l=ll.getKey();
+						BlockStateRemove r = ll.getValue();
+						if(r.placeTime-System.currentTimeMillis()/1000<=0) {
+							l.setAirAndUpdate();
 							if(r.giveBack)
-								TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.WHITE_TERRACOTTA,1,"&cBlocks"));
-							remove.add(l);
+								TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.LIGHT_WEIGHTED_PRESSURE_PLATE,1,"&eJumpPad"));
+							KnockEvents.jumps.remove(l);
 						}
 					}
+				}catch(Exception err) {
+					err.printStackTrace();
 				}
-				for(Position s:remove)
-					KnockEvents.blocky.remove(s);
-				remove.clear();
-
-				for(Entry<Position, BlockStateRemove> ll:KnockEvents.jumps.entrySet()){
-					Position l=ll.getKey();
-					BlockStateRemove r = ll.getValue();
-					if(r.placeTime-System.currentTimeMillis()/1000<=0) {
-						BlocksAPI.set(l, Material.AIR);
-						if(r.giveBack)
-		                    TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.LIGHT_WEIGHTED_PRESSURE_PLATE,1,"&eJumpPad"));
-						remove.add(l);
-					}
-				}
-				for(Position s:remove)
-					KnockEvents.jumps.remove(s);
-				remove.clear();
 			}
 		}.runRepeating(0,3);
 		new PlaceholderRegister("kbffa","DevTec","1.0") {
