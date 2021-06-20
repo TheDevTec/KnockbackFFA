@@ -160,10 +160,12 @@ public class KnockEvents implements Listener {
                 e.getPlayer().setVelocity(e.getPlayer().getLocation().getDirection().normalize().add(new Vector(0,1.75,0)));
             }
         }
-        if(API.arena.isInRegion(e.getClickedBlock().getLocation())) {
-        	e.setCancelled(true);
-        	e.setUseItemInHand(Result.DENY);
-        	e.setUseInteractedBlock(Result.DENY);
+        if(e.getClickedBlock()!=null) {
+	        if(API.arena.isInRegion(e.getClickedBlock().getLocation())) {
+	        	e.setCancelled(true);
+	        	e.setUseItemInHand(Result.DENY);
+	        	e.setUseInteractedBlock(Result.DENY);
+	        }
         }
     }
 }
