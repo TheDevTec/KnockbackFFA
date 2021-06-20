@@ -3,6 +3,7 @@ package me.devtec.knockbackffa;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Player;
@@ -30,12 +31,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-import me.devtec.theapi.utils.Position;
-
 @SuppressWarnings("deprecation")
 public class KnockEvents implements Listener {
-    protected static Map<Position, BlockStateRemove> blocky = new HashMap<>();
-    protected static Map<Position, BlockStateRemove> jumps = new HashMap<>();
+    protected static Map<Location, BlockStateRemove> blocky = new HashMap<>();
+    protected static Map<Location, BlockStateRemove> jumps = new HashMap<>();
     protected static Map<Player, Player> lastHit = new HashMap<>();
     
     @EventHandler
@@ -148,9 +147,9 @@ public class KnockEvents implements Listener {
     @EventHandler
     public void onPlace(BlockPlaceEvent e){
         if(e.getBlock().getType().equals(Material.WHITE_TERRACOTTA))
-            blocky.put(new Position(e.getBlock().getLocation()),new BlockStateRemove(e.getPlayer(),3));
+            blocky.put(e.getBlock().getLocation(),new BlockStateRemove(e.getPlayer(),3));
         if(e.getBlock().getType().equals(Material.LIGHT_WEIGHTED_PRESSURE_PLATE)){
-        	jumps.put(new Position(e.getBlock().getLocation()), new BlockStateRemove(e.getPlayer(),10));
+        	jumps.put(e.getBlock().getLocation(), new BlockStateRemove(e.getPlayer(),10));
         }
     }
     @EventHandler

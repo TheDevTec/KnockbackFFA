@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,7 +16,6 @@ import me.devtec.theapi.apis.ItemCreatorAPI;
 import me.devtec.theapi.placeholderapi.PlaceholderRegister;
 import me.devtec.theapi.scheduler.Scheduler;
 import me.devtec.theapi.scheduler.Tasker;
-import me.devtec.theapi.utils.Position;
 import me.devtec.theapi.utils.datakeeper.Data;
 
 public class Loader extends JavaPlugin {
@@ -46,35 +46,35 @@ public class Loader extends JavaPlugin {
 		new Tasker(){
 			public void run() {
 				try {
-					Iterator<Entry<Position, BlockStateRemove>> e = new HashSet<>(KnockEvents.blocky.entrySet()).iterator();
+					Iterator<Entry<Location, BlockStateRemove>> e = new HashSet<>(KnockEvents.blocky.entrySet()).iterator();
 					while(e.hasNext()) {
-						Entry<Position,BlockStateRemove> ll = e.next();
-						Position l=ll.getKey();
+						Entry<Location,BlockStateRemove> ll = e.next();
+						Location l=ll.getKey();
 						BlockStateRemove r = ll.getValue();
 						if(r.placeTime-System.currentTimeMillis()/1000<=0) {
 							r.placeTime=System.currentTimeMillis()/1000+r.tickTime;
 							if(r.i==0){
 								++r.i;
-								l.setTypeAndUpdate(Material.YELLOW_TERRACOTTA);
+								l.getBlock().setType(Material.YELLOW_TERRACOTTA);
 								continue;
 							}
 							if(r.i==1){
 								++r.i;
-								l.setTypeAndUpdate(Material.ORANGE_TERRACOTTA);
+								l.getBlock().setType(Material.ORANGE_TERRACOTTA);
 								continue;
 							}
 							if(r.i==2){
 								++r.i;
-								l.setTypeAndUpdate(Material.PINK_TERRACOTTA);
+								l.getBlock().setType(Material.PINK_TERRACOTTA);
 								continue;
 							}
 							if(r.i==3){
 								++r.i;
-								l.setTypeAndUpdate(Material.RED_TERRACOTTA);
+								l.getBlock().setType(Material.RED_TERRACOTTA);
 								continue;
 							}
 							if(r.i==4){
-								l.setAirAndUpdate();
+								l.getBlock().setType(Material.AIR);
 								if(r.giveBack)
 									TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.WHITE_TERRACOTTA,1,"&cBlocky"));
 								KnockEvents.blocky.remove(l);
@@ -83,11 +83,11 @@ public class Loader extends JavaPlugin {
 					}
 					e = new HashSet<>(KnockEvents.jumps.entrySet()).iterator();
 					while(e.hasNext()) {
-						Entry<Position,BlockStateRemove> ll = e.next();
-						Position l=ll.getKey();
+						Entry<Location,BlockStateRemove> ll = e.next();
+						Location l=ll.getKey();
 						BlockStateRemove r = ll.getValue();
 						if(r.placeTime-System.currentTimeMillis()/1000<=0) {
-							l.setAirAndUpdate();
+							l.getBlock().setType(Material.AIR);
 							if(r.giveBack)
 								TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.LIGHT_WEIGHTED_PRESSURE_PLATE,1,"&eJumpPad"));
 							KnockEvents.jumps.remove(l);
@@ -97,7 +97,7 @@ public class Loader extends JavaPlugin {
 					err.printStackTrace();
 				}
 			}
-		}.runRepeating(0,3);
+		}.runRepeatingSync(0,3);
 		new PlaceholderRegister("kbffa","DevTec","1.0") {
 			public String onRequest(Player player, String s) {
 				if(s.equalsIgnoreCase("kills"))
