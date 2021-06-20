@@ -12,8 +12,7 @@ public class API {
     public static Arena nextArena() {
         return arena=TheAPI.getRandomFromCollection(arenas.values());
     }
-
-
+    
     public static Map<String, Arena> getArenas(){
         return arenas;
     }

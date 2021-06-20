@@ -8,7 +8,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -21,21 +23,42 @@ import me.devtec.theapi.utils.datakeeper.Data;
 import me.devtec.theapi.utils.datakeeper.User;
 
 public class Arena {
+	public static ItemStack arrow = hide(ItemCreatorAPI.create(Material.ARROW, 1, "&7Sip"));
+	
 	public Location spawn;
 	public Position a,b;
 	public ItemStack[] itemStacks =
             Arrays.asList(
-                    addEnchants(ItemCreatorAPI.create(Material.STICK, 1, "&cKnockback stick")),
-                    addEnchants2(ItemCreatorAPI.create(Material.BOW, 1, "&3Luk")),
-                    ItemCreatorAPI.create(Material.ARROW, 1, "&7Šíp"),
-                    ItemCreatorAPI.create(Material.ENDER_PEARL, 1, "&5Ender Pearl"),
+            		unb(addEnchants(ItemCreatorAPI.create(Material.STICK, 1, "&cKnockback tycka"))),
+                    unb(addEnchants2(ItemCreatorAPI.create(Material.BOW, 1, "&3Luk"))),
+                    ItemCreatorAPI.create(Material.WHITE_TERRACOTTA, 64, "&cBlocky"),
                     ItemCreatorAPI.create(Material.LIGHT_WEIGHTED_PRESSURE_PLATE, 1, "&eJumpPad"),
-                    ItemCreatorAPI.create(Material.WHITE_TERRACOTTA, 64, "&cBlocks")).toArray(new ItemStack[0]);
+                    new ItemStack(Material.AIR),
+                    new ItemStack(Material.AIR),
+                    new ItemStack(Material.AIR),
+                    arrow,
+                    ItemCreatorAPI.create(Material.ENDER_PEARL, 1, "&5Ender Perla")).toArray(new ItemStack[0]);
 
     public Arena(Data data) {
     	spawn=data.getAs("spawn", Location.class);
     	a=data.getAs("a", Position.class);
     	b=data.getAs("b", Position.class);
+	}
+
+	private ItemStack unb(ItemStack addEnchants2) {
+		ItemMeta a= addEnchants2.getItemMeta();
+		a.setUnbreakable(true);
+		a.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DESTROYS, ItemFlag.HIDE_PLACED_ON, ItemFlag.HIDE_POTION_EFFECTS, ItemFlag.HIDE_UNBREAKABLE);
+		addEnchants2.setItemMeta(a);
+		return addEnchants2;
+	}
+
+	private static ItemStack hide(ItemStack addEnchants2) {
+		addEnchants2.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 0);
+		ItemMeta a= addEnchants2.getItemMeta();
+		a.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+		addEnchants2.setItemMeta(a);
+		return addEnchants2;
 	}
 
 	private ItemStack addEnchants(ItemStack create) {
@@ -82,7 +105,7 @@ public class Arena {
     	dead.getInventory().setContents(itemStacks);
     	Player killer = KnockEvents.lastHit.remove(dead);
     	if(killer!=null) {
-    		killer.getInventory().addItem(itemStacks[2]);
+    		killer.getInventory().addItem(arrow);
     		killer.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 40, 3, false, false));
     		TheAPI.msg("&b▪&8| &bKBFFA &8› &7Zabil jsi hrace &b"+dead.getName(), killer);
     		TheAPI.msg("&b▪&8| &bKBFFA &8› &7Byl jsi zabit hracem &b"+killer.getName(), dead);
