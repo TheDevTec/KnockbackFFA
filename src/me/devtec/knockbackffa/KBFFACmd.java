@@ -83,7 +83,7 @@ public class KBFFACmd implements CommandExecutor {
 			if(!API.arenas.containsKey(args[1])){
 				TheAPI.msg("&eArena "+args[1]+" not exist", s);return true;}
 			Location l = ((Player)s).getLocation();
-			API.arenas.get(args[1]).spawn=l;
+			API.arenas.get(args[1]).a=new Position(l);
 			Data d = new Data("plugins/KnockbackFFA/Arenas/"+args[1]+".yml");
 			d.set("a",new Position(l));
 			d.save(DataType.YAML);
@@ -99,7 +99,7 @@ public class KBFFACmd implements CommandExecutor {
 			if(!API.arenas.containsKey(args[1])){
 				TheAPI.msg("&eArena "+args[1]+" not exist", s);return true;}
 			Location l = ((Player)s).getLocation();
-			API.arenas.get(args[1]).spawn=l;
+			API.arenas.get(args[1]).b=new Position(l);
 			Data d = new Data("plugins/KnockbackFFA/Arenas/"+args[1]+".yml");
 			d.set("b",new Position(l));
 			d.save(DataType.YAML);

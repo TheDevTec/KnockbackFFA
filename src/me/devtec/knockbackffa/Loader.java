@@ -10,16 +10,18 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
 
 import me.devtec.theapi.TheAPI;
 import me.devtec.theapi.apis.ItemCreatorAPI;
 import me.devtec.theapi.placeholderapi.PlaceholderRegister;
 import me.devtec.theapi.scheduler.Scheduler;
 import me.devtec.theapi.scheduler.Tasker;
+import me.devtec.theapi.utils.StringUtils;
 import me.devtec.theapi.utils.datakeeper.Data;
 
 public class Loader extends JavaPlugin {
-	int arenaChangeTask;
+	int arenaChangeTask,blocks,scc;
 	
 	public void onEnable() {
 		Bukkit.getPluginManager().registerEvents(new KnockEvents(), this);
@@ -35,6 +37,17 @@ public class Loader extends JavaPlugin {
 		for(Player p : TheAPI.getOnlinePlayers())
 			p.teleport(arena.spawn);
 		
+		scc=new Tasker() {
+		    Vector sc = new Vector(0,1.8,0);
+			public void run() {
+				for(Player p : TheAPI.getOnlinePlayers())
+		            if(p.getLocation().getBlock().getType().equals(Material.GOLD_PLATE)){
+						p.setVelocity(sc);
+		                return;
+		            }
+			}
+		}.runRepeating(3, 2);
+		
 		TheAPI.createAndRegisterCommand("knockbackffa", "knockbackffa.command", new KBFFACmd(), "kbffa");
 		
 		//task na change areny
@@ -43,7 +56,8 @@ public class Loader extends JavaPlugin {
 				API.arena.moveAll(API.nextArena());
 			}
 		}.runRepeating(20*60*15, 20*60*15);
-		new Tasker(){
+		blocks=new Tasker(){
+			@SuppressWarnings("deprecation")
 			public void run() {
 				try {
 					Iterator<Entry<Location, BlockStateRemove>> e = new HashSet<>(KnockEvents.blocky.entrySet()).iterator();
@@ -55,28 +69,28 @@ public class Loader extends JavaPlugin {
 							r.placeTime=System.currentTimeMillis()/1000+r.tickTime;
 							if(r.i==0){
 								++r.i;
-								l.getBlock().setType(Material.YELLOW_TERRACOTTA);
+								l.getBlock().setTypeIdAndData(149,(byte)4,true);
 								continue;
 							}
 							if(r.i==1){
 								++r.i;
-								l.getBlock().setType(Material.ORANGE_TERRACOTTA);
+								l.getBlock().setTypeIdAndData(149,(byte)1,true);
 								continue;
 							}
 							if(r.i==2){
 								++r.i;
-								l.getBlock().setType(Material.PINK_TERRACOTTA);
+								l.getBlock().setTypeIdAndData(149,(byte)6,true);
 								continue;
 							}
 							if(r.i==3){
 								++r.i;
-								l.getBlock().setType(Material.RED_TERRACOTTA);
+								l.getBlock().setTypeIdAndData(149,(byte)14,true);
 								continue;
 							}
 							if(r.i==4){
 								l.getBlock().setType(Material.AIR);
 								if(r.giveBack)
-									TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.WHITE_TERRACOTTA,1,"&cBlocky"));
+									API.arena.addBlock(r.player);
 								KnockEvents.blocky.remove(l);
 							}
 						}
@@ -89,7 +103,7 @@ public class Loader extends JavaPlugin {
 						if(r.placeTime-System.currentTimeMillis()/1000<=0) {
 							l.getBlock().setType(Material.AIR);
 							if(r.giveBack)
-								TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.LIGHT_WEIGHTED_PRESSURE_PLATE,1,"&eJumpPad"));
+								TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.GOLD_PLATE,1,"&eJumpPad"));
 							KnockEvents.jumps.remove(l);
 						}
 					}
@@ -100,10 +114,26 @@ public class Loader extends JavaPlugin {
 		}.runRepeatingSync(0,3);
 		new PlaceholderRegister("kbffa","DevTec","1.0") {
 			public String onRequest(Player player, String s) {
-				if(s.equalsIgnoreCase("kills"))
-				return TheAPI.getUser(player).getInt("kbffa.kills")+"";
-				if(s.equalsIgnoreCase("deaths"))
-				return TheAPI.getUser(player).getInt("kbffa.deaths")+"";
+				if(s.startsWith("top_")) {
+					s=s.replace("top_", "");
+					int slot = StringUtils.getInt(s);
+					return KillStreaks.getTop(slot);
+				}
+				if(s.startsWith("score_")) {
+					s=s.replace("score_", "");
+					int slot = StringUtils.getInt(s);
+					return KillStreaks.getValue(slot)+"";
+				}
+				if(player!=null) {
+					if(s.equalsIgnoreCase("kills"))
+					return TheAPI.getUser(player).getInt("kbffa.kills")+"";
+					if(s.equalsIgnoreCase("deaths"))
+					return TheAPI.getUser(player).getInt("kbffa.deaths")+"";
+					if(s.equalsIgnoreCase("killsteak"))
+					return KillStreaks.killsteak.getOrDefault(player,0)+"";
+					if(s.equalsIgnoreCase("best_killsteak"))
+					return KillStreaks.getTop(player)+"";
+				}
 				return null;
 			}
 		}.register();
@@ -111,5 +141,7 @@ public class Loader extends JavaPlugin {
 	
 	public void onDisable() {
 		Scheduler.cancelTask(arenaChangeTask);
+		Scheduler.cancelTask(blocks);
+		Scheduler.cancelTask(scc);
 	}
 }
