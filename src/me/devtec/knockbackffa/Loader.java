@@ -69,25 +69,26 @@ public class Loader extends JavaPlugin {
 							r.placeTime=System.currentTimeMillis()/1000+r.tickTime;
 							if(r.i==0){
 								++r.i;
-								l.getBlock().setTypeIdAndData(149,(byte)4,true);
+								l.getBlock().setTypeIdAndData(159,(byte)4,true);
 								continue;
 							}
 							if(r.i==1){
 								++r.i;
-								l.getBlock().setTypeIdAndData(149,(byte)1,true);
+								l.getBlock().setTypeIdAndData(159,(byte)1,true);
 								continue;
 							}
 							if(r.i==2){
 								++r.i;
-								l.getBlock().setTypeIdAndData(149,(byte)6,true);
+								l.getBlock().setTypeIdAndData(159,(byte)6,true);
 								continue;
 							}
 							if(r.i==3){
 								++r.i;
-								l.getBlock().setTypeIdAndData(149,(byte)14,true);
+								l.getBlock().setTypeIdAndData(159,(byte)14,true);
 								continue;
 							}
 							if(r.i==4){
+								++r.i;
 								l.getBlock().setType(Material.AIR);
 								if(r.giveBack)
 									API.arena.addBlock(r.player);
@@ -100,10 +101,12 @@ public class Loader extends JavaPlugin {
 						Entry<Location,BlockStateRemove> ll = e.next();
 						Location l=ll.getKey();
 						BlockStateRemove r = ll.getValue();
+						if(r.i!=0)return;
 						if(r.placeTime-System.currentTimeMillis()/1000<=0) {
+							++r.i;
 							l.getBlock().setType(Material.AIR);
 							if(r.giveBack)
-								TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.GOLD_PLATE,1,"&eJumpPad"));
+								TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.GOLD_PLATE,1,"&e&lJumpPad"));
 							KnockEvents.jumps.remove(l);
 						}
 					}

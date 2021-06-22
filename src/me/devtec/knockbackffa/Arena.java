@@ -18,7 +18,6 @@ import org.bukkit.potion.PotionEffectType;
 
 import me.devtec.theapi.TheAPI;
 import me.devtec.theapi.apis.ItemCreatorAPI;
-import me.devtec.theapi.blocksapi.BlocksAPI;
 import me.devtec.theapi.scheduler.Tasker;
 import me.devtec.theapi.utils.Position;
 import me.devtec.theapi.utils.datakeeper.Data;
@@ -28,7 +27,7 @@ public class Arena {
 	static Random r = new Random();
 	public static ItemStack arrow = hide(ItemCreatorAPI.create(Material.ARROW, 1, "&7&lSipy")),
 			epearl=hide(ItemCreatorAPI.create(Material.ENDER_PEARL, 1, "&5&lEnder Perla")),
-			block=hide(ItemCreatorAPI.create(Material.HARD_CLAY, 64, "&b&lB&f&llock"));
+			block=hide(ItemCreatorAPI.create(Material.HARD_CLAY, 1, "&b&lB&f&llock"));
 	
 	public Location spawn;
 	public Position a,b;
@@ -36,7 +35,7 @@ public class Arena {
             Arrays.asList(
             		unb(addEnchants(ItemCreatorAPI.create(Material.STICK, 1, "&c&lKnockback tycka"))),
                     unb(addEnchants2(ItemCreatorAPI.create(Material.BOW, 1, "&6&lLuk"))),
-                    block,
+                    hide(ItemCreatorAPI.create(Material.HARD_CLAY, 64, "&b&lB&f&llock")),
                     ItemCreatorAPI.create(Material.GOLD_PLATE, 1, "&e&lJumpPad"),
                     new ItemStack(Material.AIR),
                     new ItemStack(Material.AIR),
@@ -77,7 +76,15 @@ public class Arena {
 	}
 	
 	public boolean isInRegion(Location loc) {
-		return BlocksAPI.isInside(new Position(loc), a, b);
+		double xMin = Math.min(a.getX(), b.getX());
+		double yMin = Math.min(a.getY(), b.getY());
+		double zMin = Math.min(a.getZ(), b.getZ());
+		double xMax = Math.max(a.getX(), b.getX());
+		double yMax = Math.max(a.getY(), b.getY());
+		double zMax = Math.max(a.getZ(), b.getZ());
+		return loc.getWorld().equals(a.getWorld()) && loc.getX() >= xMin && loc.getX() <= xMax
+				&& loc.getY() >= yMin && loc.getY() <= yMax && loc.getZ() >= zMin
+				&& loc.getZ() <= zMax;
 	}
 	
 	public void join(Player dead) {
@@ -186,7 +193,7 @@ public class Arena {
 	}
     
 	public void addArrow(Player s) {
-    	if(s.getInventory().contains(arrow)) {
+    	if(s.getInventory().contains(arrow.getType())) {
     		s.getInventory().addItem(arrow);
     	}else {
     		ItemStack d = s.getInventory().getItem(7);
@@ -197,7 +204,7 @@ public class Arena {
     }
     
     public void addEnderpearl(Player s) {
-    	if(s.getInventory().contains(epearl)) {
+    	if(s.getInventory().contains(epearl.getType())) {
     		s.getInventory().addItem(epearl);
     	}else {
     		ItemStack d = s.getInventory().getItem(8);
@@ -208,7 +215,7 @@ public class Arena {
     }
     
     public void addBlock(Player s) {
-    	if(s.getInventory().contains(block)) {
+    	if(s.getInventory().contains(block.getType())) {
     		s.getInventory().addItem(block);
     	}else {
     		ItemStack d = s.getInventory().getItem(3);

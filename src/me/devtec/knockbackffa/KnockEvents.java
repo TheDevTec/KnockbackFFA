@@ -22,6 +22,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -39,17 +40,20 @@ public class KnockEvents implements Listener {
 
     @EventHandler
     public void hit(EntityDamageEvent e) {
-        if(!API.arena.isInRegion(e.getEntity().getLocation()))
+    	e.setDamage(0);
+        e.setCancelled(true);
+        if(!API.arena.isInRegion(e.getEntity().getLocation())||API.arena.dead.contains(e.getEntity())) {
         	e.setCancelled(true);
-    	if(API.arena.dead.contains(e.getEntity())) {
-    		e.setCancelled(true);
+            if(e.getCause()==DamageCause.VOID||e.getCause()==DamageCause.LAVA||e.getCause()==DamageCause.FIRE||e.getCause()==DamageCause.FIRE_TICK) {
+            	API.arena.notifyDeath((Player)e.getEntity());
+            }
     		return;
-    	}
-        if(e.getCause()==DamageCause.ENTITY_ATTACK||e.getCause()==DamageCause.PROJECTILE)return;
+        }
+        if(e.getCause()==DamageCause.ENTITY_ATTACK||e.getCause()==DamageCause.PROJECTILE)
+            e.setCancelled(false);
         if(e.getCause()==DamageCause.VOID||e.getCause()==DamageCause.LAVA||e.getCause()==DamageCause.FIRE||e.getCause()==DamageCause.FIRE_TICK) {
         	API.arena.notifyDeath((Player)e.getEntity());
         }
-        e.setCancelled(true);
     }
 
     @EventHandler
@@ -147,6 +151,11 @@ public class KnockEvents implements Listener {
     
     @EventHandler
     public void spawn(CreatureSpawnEvent e) {
+    	e.setCancelled(true);
+    }
+    
+    @EventHandler
+    public void spawn(ItemSpawnEvent e) {
     	e.setCancelled(true);
     }
     
