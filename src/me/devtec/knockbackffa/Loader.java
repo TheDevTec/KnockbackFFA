@@ -36,9 +36,10 @@ public class Loader extends JavaPlugin {
 		
 		Arena arena = API.nextArena(); //load prvni areny
 		//teleport online hraci do areny
+		arena.spawn.getChunk().load(true);
 		if(arena!=null)
 		for(Player p : TheAPI.getOnlinePlayers())
-			p.teleport(arena.spawn);
+			arena.join(p);
 		
 		scc=new Tasker() {
 		    Vector sc = new Vector(0,1.8,0);
@@ -85,6 +86,11 @@ public class Loader extends JavaPlugin {
 						if(r.placeTime-System.currentTimeMillis()/1000<=0) {
 							r.placeTime=System.currentTimeMillis()/1000+r.tickTime;
 							if(r.i==0){
+								if(l.getBlock().getType()!=Material.HARD_CLAY) {
+									l.getBlock().setType(Material.AIR);
+									KnockEvents.blocky.remove(l);
+									continue;
+								}
 								++r.i;
 								l.getBlock().setTypeIdAndData(159,(byte)4,true);
 								continue;
@@ -106,9 +112,11 @@ public class Loader extends JavaPlugin {
 							}
 							if(r.i==4){
 								++r.i;
-								l.getBlock().setType(Material.AIR);
+								if(l.getBlock().getType().getId()==159)
+									l.getBlock().setType(Material.AIR);
 								if(r.giveBack)
 									API.arena.addBlock(r.player);
+								r.giveBack=false;
 								KnockEvents.blocky.remove(l);
 							}
 						}
@@ -127,6 +135,7 @@ public class Loader extends JavaPlugin {
 									l.getBlock().setType(Material.AIR);
 								if(r.giveBack && !r.player.getInventory().contains(Material.GOLD_PLATE))
 									TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.GOLD_PLATE,1,"&e&lJumpPad"));
+								r.giveBack=false;
 								KnockEvents.jumps.remove(l);
 							}
 						}
@@ -159,9 +168,9 @@ public class Loader extends JavaPlugin {
 					return TheAPI.getUser(player).getInt("kbffa.kills")+"";
 					if(s.equalsIgnoreCase("deaths"))
 					return TheAPI.getUser(player).getInt("kbffa.deaths")+"";
-					if(s.equalsIgnoreCase("killsteak"))
+					if(s.equalsIgnoreCase("killstreak"))
 					return KillStreaks.killsteak.getOrDefault(player,0)+"";
-					if(s.equalsIgnoreCase("best_killsteak"))
+					if(s.equalsIgnoreCase("best_killstreak"))
 					return KillStreaks.getTop(player)+"";
 				}
 				return null;

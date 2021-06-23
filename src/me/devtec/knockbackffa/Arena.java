@@ -42,7 +42,7 @@ public class Arena {
                     new ItemStack(Material.AIR),
                     new ItemStack(Material.AIR),
                     arrow,
-                    epearl).toArray(new ItemStack[0]);
+                    epearl).toArray(new ItemStack[9]);
 
     public Arena(Data data) {
     	name=data.getString("name");
@@ -90,13 +90,17 @@ public class Arena {
 	}
 	
 	public void join(Player dead) {
-    	dead.teleport(spawn);
-    	dead.setHealth(20);
-    	dead.setFlySpeed(20);
-    	dead.setFireTicks(-20);
-    	dead.getInventory().clear();
-    	dead.getInventory().setContents(itemStacks);
-    	dead.updateInventory();
+    	try {
+    		dead.teleport(spawn);
+        	dead.setHealth(20);
+        	dead.setFoodLevel(20);
+        	dead.setFireTicks(-20);
+        	dead.getInventory().clear();
+        	dead.getInventory().setContents(itemStacks);
+        	dead.updateInventory();
+    	}catch(Exception ner) {
+    		ner.printStackTrace();
+    	}
     }
 
     public void moveAll(Arena arena) {
@@ -219,8 +223,8 @@ public class Arena {
     
     public void addBlock(Player s) {
     	ItemStack st = block.clone();
+		if(count(s.getInventory().getContents(),st.getType())>=64)return;
     	if(s.getInventory().contains(st.getType())) {
-    		if(count(s.getInventory().getContents(),st.getType())!=64)
     		s.getInventory().addItem(st);
     	}else {
     		ItemStack d = s.getInventory().getItem(3);
@@ -233,7 +237,7 @@ public class Arena {
 	private int count(ItemStack[] contents, Material type) {
 		int c = 0;
 		for(ItemStack st : contents)
-			if(st.getType()==type)++c;
+			if(st!=null&&st.getType()==type)c+=st.getAmount();
 		return c;
 	}
 }
