@@ -66,12 +66,12 @@ public class Arena {
 	}
 
 	private ItemStack addEnchants(ItemStack create) {
-		create.addUnsafeEnchantment(Enchantment.KNOCKBACK, 5);
+		create.addUnsafeEnchantment(Enchantment.KNOCKBACK, 3);
 		return create;
 	}
 
 	private ItemStack addEnchants2(ItemStack create) {
-		create.addUnsafeEnchantment(Enchantment.ARROW_KNOCKBACK, 2);
+		create.addUnsafeEnchantment(Enchantment.ARROW_KNOCKBACK, 4);
 		return create;
 	}
 	
