@@ -73,7 +73,7 @@ public class KillStreaks {
 	
 	private static void notifyKillsteak(Player p, int sc) {
 		if(sc%5==3)API.arena.addEnderpearl(p);
-		else if(sc%5==5)p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 200, 1, false, false));
+		else if(sc%5==5)p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20*60, 2, false, false));
 	}
 	
 }

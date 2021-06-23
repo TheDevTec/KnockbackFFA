@@ -31,6 +31,7 @@ public class Arena {
 	
 	public Location spawn;
 	public Position a,b;
+	public String name;
 	public ItemStack[] itemStacks =
             Arrays.asList(
             		unb(addEnchants(ItemCreatorAPI.create(Material.STICK, 1, "&c&lKnockback tycka"))),
@@ -44,6 +45,7 @@ public class Arena {
                     epearl).toArray(new ItemStack[0]);
 
     public Arena(Data data) {
+    	name=data.getString("name");
     	spawn=data.getAs("spawn", Location.class);
     	a=data.getAs("a", Position.class);
     	b=data.getAs("b", Position.class);
@@ -90,6 +92,7 @@ public class Arena {
 	public void join(Player dead) {
     	dead.teleport(spawn);
     	dead.setHealth(20);
+    	dead.setFlySpeed(20);
     	dead.setFireTicks(-20);
     	dead.getInventory().clear();
     	dead.getInventory().setContents(itemStacks);
@@ -97,9 +100,12 @@ public class Arena {
     }
 
     public void moveAll(Arena arena) {
-        if (arena != null)
+        if (arena != null) {
+        	TheAPI.bcMsg("&b▪&8| &bKBFFA &8› &7Arena zmenena na &b"+arena.name);
+        	Loader.nextArenaIn=60*10;
             for (Player player : TheAPI.getOnlinePlayers())
                 arena.join(player);
+        }
     }
 
     public ItemStack[] getItemStacks() {
@@ -115,12 +121,7 @@ public class Arena {
     	List<Entity> f = KnockEvents.projectiles.remove(dead);
     	if(f!=null)
     	for(Entity e : f)e.remove();
-    	dead.teleport(spawn);
-    	dead.setHealth(20);
-    	dead.setFireTicks(-20);
-    	dead.getInventory().clear();
-    	dead.getInventory().setContents(itemStacks);
-    	dead.updateInventory();
+    	join(dead);
     	Player killer = KnockEvents.lastHit.remove(dead);
     	if(killer!=null) {
         	KillStreaks.addKillSteak(killer);
@@ -136,9 +137,9 @@ public class Arena {
     	User user = TheAPI.getUser(dead);
     	user.setAndSave("kbffa.deaths", user.getInt("kbffa.deaths")+1);
     	for(BlockStateRemove r : KnockEvents.blocky.values())
-    		if(r.player.equals(dead))r.giveBack=false;
+    		if(r.player.getName().equals(dead.getName()))r.giveBack=false;
     	for(BlockStateRemove r : KnockEvents.jumps.values())
-    		if(r.player.equals(dead))r.giveBack=false;
+    		if(r.player.getName().equals(dead.getName()))r.giveBack=false;
     	new Tasker() {
 			public void run() {
 				Arena.this.dead.remove(dead);
@@ -193,35 +194,46 @@ public class Arena {
 	}
     
 	public void addArrow(Player s) {
-    	if(s.getInventory().contains(arrow.getType())) {
-    		s.getInventory().addItem(arrow);
+    	ItemStack st = arrow.clone();
+    	if(s.getInventory().contains(st.getType())) {
+    		s.getInventory().addItem(st);
     	}else {
     		ItemStack d = s.getInventory().getItem(7);
-    		if(d==null||d.getType()==Material.AIR)s.getInventory().setItem(7, arrow);
+    		if(d==null||d.getType()==Material.AIR||d.getAmount()==0)s.getInventory().setItem(7, st);
     		else
-        		s.getInventory().addItem(arrow);
+        		s.getInventory().addItem(st);
     	}
     }
     
     public void addEnderpearl(Player s) {
-    	if(s.getInventory().contains(epearl.getType())) {
-    		s.getInventory().addItem(epearl);
+    	ItemStack st = epearl.clone();
+    	if(s.getInventory().contains(st.getType())) {
+    		s.getInventory().addItem(st);
     	}else {
     		ItemStack d = s.getInventory().getItem(8);
-    		if(d==null||d.getType()==Material.AIR)s.getInventory().setItem(8, epearl);
+    		if(d==null||d.getType()==Material.AIR||d.getAmount()==0)s.getInventory().setItem(8, st);
     		else
-        		s.getInventory().addItem(epearl);
+        		s.getInventory().addItem(st);
     	}
     }
     
     public void addBlock(Player s) {
-    	if(s.getInventory().contains(block.getType())) {
-    		s.getInventory().addItem(block);
+    	ItemStack st = block.clone();
+    	if(s.getInventory().contains(st.getType())) {
+    		if(count(s.getInventory().getContents(),st.getType())!=64)
+    		s.getInventory().addItem(st);
     	}else {
     		ItemStack d = s.getInventory().getItem(3);
-    		if(d==null||d.getType()==Material.AIR)s.getInventory().setItem(3, block);
+    		if(d==null||d.getType()==Material.AIR||d.getAmount()==0)s.getInventory().setItem(3, st);
     		else
-        		s.getInventory().addItem(block);
+        		s.getInventory().addItem(st);
     	}
     }
+
+	private int count(ItemStack[] contents, Material type) {
+		int c = 0;
+		for(ItemStack st : contents)
+			if(st.getType()==type)++c;
+		return c;
+	}
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -15,6 +16,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -29,7 +31,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.potion.PotionEffectType;
+import org.bukkit.event.weather.ThunderChangeEvent;
+import org.bukkit.event.weather.WeatherChangeEvent;
 
 public class KnockEvents implements Listener {
     protected static Map<Location, BlockStateRemove> blocky = new HashMap<>();
@@ -95,6 +98,7 @@ public class KnockEvents implements Listener {
 
     @EventHandler
     public void pickup(PlayerPickupItemEvent e) {
+    	if(e.getPlayer().getGameMode()==GameMode.CREATIVE)return;
         e.setCancelled(true);
     }
 
@@ -105,17 +109,17 @@ public class KnockEvents implements Listener {
 
     @EventHandler
     public void food(FoodLevelChangeEvent e) {
-        e.setCancelled(true);
+    	e.setFoodLevel(20);
     }
 
     @EventHandler
     public void regain(EntityRegainHealthEvent e) {
-    	if(!((Player)e.getEntity()).hasPotionEffect(PotionEffectType.REGENERATION))
-    		e.setCancelled(true);
+    	e.setAmount(20);
     }
 
     @EventHandler
     public void blockBreak(BlockBreakEvent e) {
+    	if(e.getPlayer().getGameMode()==GameMode.CREATIVE)return;
         e.setCancelled(true);
     }
 
@@ -137,11 +141,28 @@ public class KnockEvents implements Listener {
     }
 
     @EventHandler
+    public void weather(WeatherChangeEvent e) {
+    	e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void weather(ThunderChangeEvent e) {
+    	e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void leaves(LeavesDecayEvent e) {
+    	e.setCancelled(true);
+    }
+
+    @EventHandler
     public void blockPlace(BlockPlaceEvent e) {
+    	if(e.getPlayer().getGameMode()==GameMode.CREATIVE)return;
         if(!API.arena.isInRegion(e.getBlock().getLocation())) {
         	e.setCancelled(true);
         	return;
         }
+        if(e.isCancelled())return;
         if(e.getBlock().getType().equals(Material.HARD_CLAY))
             blocky.put(e.getBlock().getLocation(),new BlockStateRemove(e.getPlayer(),3));
         if(e.getBlock().getType().equals(Material.GOLD_PLATE)){
@@ -161,6 +182,7 @@ public class KnockEvents implements Listener {
     
     @EventHandler
     public void interact(PlayerInteractEvent e) {
+    	if(e.getPlayer().getGameMode()==GameMode.CREATIVE)return;
         if(e.getClickedBlock()!=null) {
 	        if(!API.arena.isInRegion(e.getClickedBlock().getLocation())) {
 	        	e.setCancelled(true);

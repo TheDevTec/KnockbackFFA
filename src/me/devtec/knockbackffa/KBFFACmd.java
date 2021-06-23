@@ -38,7 +38,10 @@ public class KBFFACmd implements CommandExecutor {
 				TheAPI.msg("&eArena "+args[1]+" already exists", s);
 				return true;
 			}
-			API.arenas.put(args[1], new Arena(new Data("plugins/KnockbackFFA/Arenas/"+args[1]+".yml")));
+			Data d =new Data("plugins/KnockbackFFA/Arenas/"+args[1]+".yml");
+			d.set("name", args[1]);
+			d.save(DataType.YAML);
+			API.arenas.put(args[1], new Arena(d));
 			TheAPI.msg("&eCreated arena "+args[1], s);
 			return true;
 		}
@@ -118,8 +121,21 @@ public class KBFFACmd implements CommandExecutor {
 			TheAPI.msg("&eTeleported to arena &b"+args[1],s);
 			return true;
 		}
+		if(args[0].equalsIgnoreCase("name")){
+			if(!(s instanceof Player))return true;
+			if(args.length<=2){
+				TheAPI.msg("&e/KBFFA Name <arena> <value...>", s);
+				return true;
+			}
+			if(!API.arenas.containsKey(args[1])){
+				TheAPI.msg("&eArena "+args[1]+" not exist", s);return true;}
+			API.arenas.get(args[1]).name=StringUtils.buildString(2,args);
+			TheAPI.msg("&eSet displayname of arena &b"+args[1]+" &7to &b"+API.arenas.get(args[1]).name,s);
+			return true;
+		}
 		if(args[0].equalsIgnoreCase("nextarena")){
-			API.arena.moveAll(API.nextArena());
+			Loader.nextArenaIn=3;
+			TheAPI.msg("&eArena will be changed in 3s",s);
 			return true;
 		}
 		if(args[0].equalsIgnoreCase("list")){

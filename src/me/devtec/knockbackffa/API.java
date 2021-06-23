@@ -10,7 +10,14 @@ public class API {
     protected static Arena arena;
 
     public static Arena nextArena() {
-        return arena=TheAPI.getRandomFromCollection(arenas.values());
+    	if(arenas.size()<=1) {
+        	if(arena==null)return arena=TheAPI.getRandomFromCollection(arenas.values());
+    		return arena;
+    	}
+    	Arena next = TheAPI.getRandomFromCollection(arenas.values());
+    	while(next.equals(arena))
+    		next=TheAPI.getRandomFromCollection(arenas.values());
+    	return arena=next;
     }
     
     public static Map<String, Arena> getArenas(){

@@ -23,6 +23,9 @@ import me.devtec.theapi.utils.datakeeper.Data;
 public class Loader extends JavaPlugin {
 	int arenaChangeTask,blocks,scc;
 	
+	public static int nextArenaIn = 60*10;
+	PlaceholderRegister d;
+	
 	public void onEnable() {
 		Bukkit.getPluginManager().registerEvents(new KnockEvents(), this);
 		//load aren do mapy
@@ -53,13 +56,27 @@ public class Loader extends JavaPlugin {
 		//task na change areny
 		arenaChangeTask=new Tasker() {
 			public void run() {
-				API.arena.moveAll(API.nextArena());
+				API.arena.a.getWorld().setTime(1000);
+				if(--nextArenaIn==0) {
+					API.arena.moveAll(API.nextArena());
+				}else {
+					switch(nextArenaIn) {
+					case 1:
+					case 2:
+					case 3:
+					case 10:
+					case 15:
+			        	TheAPI.bcMsg("&b▪&8| &bKBFFA &8› &7Arena se zmeni za &b"+nextArenaIn+"s");
+			        	break;
+					}
+				}
 			}
-		}.runRepeating(20*60*15, 20*60*15);
+		}.runRepeating(20,20);
 		blocks=new Tasker(){
 			@SuppressWarnings("deprecation")
 			public void run() {
 				try {
+					synchronized(KnockEvents.blocky) {
 					Iterator<Entry<Location, BlockStateRemove>> e = new HashSet<>(KnockEvents.blocky.entrySet()).iterator();
 					while(e.hasNext()) {
 						Entry<Location,BlockStateRemove> ll = e.next();
@@ -96,18 +113,22 @@ public class Loader extends JavaPlugin {
 							}
 						}
 					}
-					e = new HashSet<>(KnockEvents.jumps.entrySet()).iterator();
-					while(e.hasNext()) {
-						Entry<Location,BlockStateRemove> ll = e.next();
-						Location l=ll.getKey();
-						BlockStateRemove r = ll.getValue();
-						if(r.i!=0)return;
-						if(r.placeTime-System.currentTimeMillis()/1000<=0) {
-							++r.i;
-							l.getBlock().setType(Material.AIR);
-							if(r.giveBack)
-								TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.GOLD_PLATE,1,"&e&lJumpPad"));
-							KnockEvents.jumps.remove(l);
+					}
+					synchronized(KnockEvents.jumps){
+						Iterator<Entry<Location, BlockStateRemove>> e = new HashSet<>(KnockEvents.jumps.entrySet()).iterator();
+						while(e.hasNext()) {
+							Entry<Location,BlockStateRemove> ll = e.next();
+							Location l=ll.getKey();
+							BlockStateRemove r = ll.getValue();
+							if(r.i!=0)return;
+							if(r.placeTime-System.currentTimeMillis()/1000<=0) {
+								++r.i;
+								if(l.getBlock().getType()==Material.GOLD_PLATE)
+									l.getBlock().setType(Material.AIR);
+								if(r.giveBack && !r.player.getInventory().contains(Material.GOLD_PLATE))
+									TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.GOLD_PLATE,1,"&e&lJumpPad"));
+								KnockEvents.jumps.remove(l);
+							}
 						}
 					}
 				}catch(Exception err) {
@@ -115,7 +136,7 @@ public class Loader extends JavaPlugin {
 				}
 			}
 		}.runRepeatingSync(0,3);
-		new PlaceholderRegister("kbffa","DevTec","1.0") {
+		d=new PlaceholderRegister("kbffa","DevTec","1.0") {
 			public String onRequest(Player player, String s) {
 				if(s.startsWith("top_")) {
 					s=s.replace("top_", "");
@@ -126,6 +147,12 @@ public class Loader extends JavaPlugin {
 					s=s.replace("score_", "");
 					int slot = StringUtils.getInt(s);
 					return KillStreaks.getValue(slot)+"";
+				}
+				if(s.equalsIgnoreCase("next_map")) {
+					return StringUtils.timeToString(nextArenaIn);
+				}
+				if(s.equalsIgnoreCase("map")) {
+					return API.arena.name;
 				}
 				if(player!=null) {
 					if(s.equalsIgnoreCase("kills"))
@@ -139,10 +166,20 @@ public class Loader extends JavaPlugin {
 				}
 				return null;
 			}
-		}.register();
+		};
+		d.register();
 	}
 	
 	public void onDisable() {
+		for(Location e : KnockEvents.blocky.keySet()) {
+			e.getBlock().setType(Material.AIR);
+		}
+		KnockEvents.blocky.clear();
+		for(Location e : KnockEvents.jumps.keySet()) {
+			e.getBlock().setType(Material.AIR);
+		}
+		KnockEvents.jumps.clear();
+		d.doUnregister();
 		Scheduler.cancelTask(arenaChangeTask);
 		Scheduler.cancelTask(blocks);
 		Scheduler.cancelTask(scc);
