@@ -36,7 +36,6 @@ public class Loader extends JavaPlugin {
 		
 		Arena arena = API.nextArena(); //load prvni areny
 		//teleport online hraci do areny
-		arena.spawn.getChunk().load(true);
 		if(arena!=null)
 		for(Player p : TheAPI.getOnlinePlayers())
 			arena.join(p);

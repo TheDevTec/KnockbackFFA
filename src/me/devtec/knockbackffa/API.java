@@ -23,4 +23,9 @@ public class API {
     public static Map<String, Arena> getArenas(){
         return arenas;
     }
+
+	public static Arena getArena() {
+		// TODO Auto-generated method stub
+		return arena;
+	}
 }

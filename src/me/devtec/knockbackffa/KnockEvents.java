@@ -34,6 +34,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.weather.ThunderChangeEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 
+import me.devtec.theapi.TheAPI;
+
 public class KnockEvents implements Listener {
     protected static Map<Location, BlockStateRemove> blocky = new HashMap<>();
     protected static Map<Location, BlockStateRemove> jumps = new HashMap<>();
@@ -87,6 +89,8 @@ public class KnockEvents implements Listener {
     @EventHandler
     public void join(PlayerJoinEvent e) {
         e.setJoinMessage("");
+        for(Player p : TheAPI.getOnlinePlayers())
+        	p.showPlayer(e.getPlayer());
     	if(API.arena!=null)
             API.arena.join(e.getPlayer());
     }
