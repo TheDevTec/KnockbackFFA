@@ -18,6 +18,7 @@ public class KBFFACmd implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender s, Command arg1, String arg2, String[] args) {
+		if(!s.hasPermission("kbffa.admin"))return true;
 		if(args.length==0) {
 			TheAPI.msg("&e/KBFFA Create <name>", s);
 			TheAPI.msg("&e/KBFFA Delete <name>", s);
