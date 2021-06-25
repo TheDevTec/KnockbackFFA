@@ -8,10 +8,10 @@ import me.devtec.knockbackffa.API;
 import me.devtec.knockbackffa.Arena;
 import me.devtec.theapi.utils.listener.Event;
 
-public class ArenaDeathEvent extends Event {
+public class ArenaLeaveEvent extends Event {
 	private final Player p, k;
 	
-	public ArenaDeathEvent(Player s, Player killer) {
+	public ArenaLeaveEvent(Player s, Player killer) {
 		p=s;
 		k=killer;
 	}
@@ -19,7 +19,7 @@ public class ArenaDeathEvent extends Event {
 	public Player getPlayer() {
 		return p;
 	}
-
+	
 	@Nullable
 	public Player getKiller() {
 		return k;

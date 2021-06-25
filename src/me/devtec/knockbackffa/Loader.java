@@ -41,11 +41,10 @@ public class Loader extends JavaPlugin {
 			arena.join(p);
 		
 		scc=new Tasker() {
-		    Vector sc = new Vector(0,1.8,0);
 			public void run() {
 				for(Player p : TheAPI.getOnlinePlayers()) {
 		            if(p.getLocation().getBlock().getType().equals(Material.GOLD_PLATE)){
-						p.setVelocity(sc);
+						p.setVelocity(p.getLocation().getDirection().divide(new Vector(2,2,2)).setY(1.8));
 		                return;
 		            }
 		            if(p.getLocation().getBlock().getType().equals(Material.IRON_PLATE)){

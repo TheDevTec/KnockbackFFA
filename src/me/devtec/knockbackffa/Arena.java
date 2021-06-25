@@ -13,10 +13,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import me.devtec.knockbackffa.events.ArenaDeathEvent;
+import me.devtec.knockbackffa.events.ArenaJoinEvent;
+import me.devtec.knockbackffa.events.ArenaLeaveEvent;
+import me.devtec.knockbackffa.events.ArenaSwitchEvent;
 import me.devtec.theapi.TheAPI;
 import me.devtec.theapi.apis.ItemCreatorAPI;
 import me.devtec.theapi.scheduler.Tasker;
@@ -92,10 +93,14 @@ public class Arena {
 	}
 	
 	public void join(Player dead) {
+		ArenaJoinEvent d = new ArenaJoinEvent(dead);
+    	TheAPI.callEvent(d);
+    	resetPlayer(dead);
+    }
+	
+	public void resetPlayer(Player dead) {
     	try {
     		dead.teleport(spawn);
-        	dead.setHealth(20);
-        	dead.setFoodLevel(20);
         	dead.setFireTicks(-20);
         	dead.getInventory().clear();
         	dead.getInventory().setContents(itemStacks);
@@ -107,11 +112,15 @@ public class Arena {
 
     public void moveAll(Arena arena) {
         if (arena != null) {
+    		ArenaSwitchEvent d = new ArenaSwitchEvent(this, arena);
+        	TheAPI.callEvent(d);
+        	arena=d.getTo();
+        	if(arena==null)arena=d.getFrom();
         	TheAPI.bcMsg("&b▪&8| &bKBFFA &8› &7Arena zmenena na &b"+arena.name);
         	Loader.nextArenaIn=60*10;
             NMSAPI.postToMainThread(() -> {
             	for (Player player : TheAPI.getOnlinePlayers())
-                    arena.join(player);
+                	resetPlayer(player);
             });
         }
     }
@@ -121,6 +130,33 @@ public class Arena {
     }
     
     List<Player> dead = new ArrayList<>();
+    
+    public void notifyLeave(Player dead) {
+    	if(this.dead.contains(dead))return;
+    	Player killer = KnockEvents.lastHit.remove(dead);
+    	ArenaLeaveEvent d = new ArenaLeaveEvent(dead,killer);
+    	TheAPI.callEvent(d);
+    	KillStreaks.reset(dead);
+    	List<Entity> f = KnockEvents.projectiles.remove(dead);
+    	if(f!=null)
+    	for(Entity e : f)e.remove();
+    	if(killer!=null) {
+        	KillStreaks.addKillSteak(killer);
+        	addArrow(killer);
+    		TheAPI.msg("&b▪&8| &bKBFFA &8› &7"+generateRandomDeathMessageKiller(dead.getName()), killer);
+        	User user = TheAPI.getUser(killer);
+        	user.setAndSave("kbffa.kills", user.getInt("kbffa.kills")+1);
+    	}
+    	for(BlockStateRemove r : KnockEvents.blocky.values())
+    		if(r.player.getName().equals(dead.getName()))r.giveBack=false;
+    	for(BlockStateRemove r : KnockEvents.jumps.values())
+    		if(r.player.getName().equals(dead.getName()))r.giveBack=false;
+    	new Tasker() {
+			public void run() {
+				Arena.this.dead.remove(dead);
+			}
+		}.runLater(20);
+    }
     
     public void notifyDeath(Player dead) {
     	if(this.dead.contains(dead))return;
@@ -132,11 +168,10 @@ public class Arena {
     	List<Entity> f = KnockEvents.projectiles.remove(dead);
     	if(f!=null)
     	for(Entity e : f)e.remove();
-    	join(dead);
+    	resetPlayer(dead);
     	if(killer!=null) {
         	KillStreaks.addKillSteak(killer);
-    		killer.getInventory().addItem(arrow);
-    		killer.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 40, 3, false, false));
+        	addArrow(killer);
     		TheAPI.msg("&b▪&8| &bKBFFA &8› &7"+generateRandomDeathMessageKiller(dead.getName()), killer);
     		TheAPI.msg("&b▪&8| &bKBFFA &8› &7"+generateRandomDeathMessage(killer.getName()), dead);
         	User user = TheAPI.getUser(killer);
