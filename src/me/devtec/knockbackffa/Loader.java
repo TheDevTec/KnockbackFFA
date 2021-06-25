@@ -43,11 +43,16 @@ public class Loader extends JavaPlugin {
 		scc=new Tasker() {
 		    Vector sc = new Vector(0,1.8,0);
 			public void run() {
-				for(Player p : TheAPI.getOnlinePlayers())
+				for(Player p : TheAPI.getOnlinePlayers()) {
 		            if(p.getLocation().getBlock().getType().equals(Material.GOLD_PLATE)){
 						p.setVelocity(sc);
 		                return;
 		            }
+		            if(p.getLocation().getBlock().getType().equals(Material.IRON_PLATE)){
+						p.setVelocity(p.getLocation().getDirection().multiply(4).setY(0.8));
+		                return;
+		            }
+				}
 			}
 		}.runRepeating(3, 2);
 		
