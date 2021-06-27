@@ -10,10 +10,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.util.Vector;
 
 import me.devtec.theapi.TheAPI;
 import me.devtec.theapi.apis.ItemCreatorAPI;
+import me.devtec.theapi.configapi.Config;
 import me.devtec.theapi.placeholderapi.PlaceholderRegister;
 import me.devtec.theapi.scheduler.Scheduler;
 import me.devtec.theapi.scheduler.Tasker;
@@ -24,17 +24,25 @@ public class Loader extends JavaPlugin {
 	int arenaChangeTask,blocks,scc;
 	
 	public static int nextArenaIn = 60*10;
+	public static Arena next;
+	public static Config c;
+
+	public static int rewardAmount;
 	PlaceholderRegister d;
 	
 	public void onEnable() {
+		c = Config.loadConfig(this, "config.yml", "KnockbackFFA/config.yml");
+		rewardAmount=c.getInt("rewards.required-kills");
 		Bukkit.getPluginManager().registerEvents(new KnockEvents(), this);
 		//load aren do mapy
 		File fr = new File("plugins/KnockbackFFA/Arenas");
 		if(!fr.exists())fr.mkdirs();
 		for(File f : fr.listFiles())
-			API.arenas.put(f.getName().substring(0, f.getName().length()-4), new Arena(new Data(f)));
+			API.arenas.put(f.getName().substring(0, f.getName().length()-4).toLowerCase(), new Arena(new Data(f)));
 		
 		Arena arena = API.nextArena(); //load prvni areny
+		API.arena=arena;
+		next=API.nextArena();
 		//teleport online hraci do areny
 		if(arena!=null)
 		for(Player p : TheAPI.getOnlinePlayers())
@@ -44,7 +52,7 @@ public class Loader extends JavaPlugin {
 			public void run() {
 				for(Player p : TheAPI.getOnlinePlayers()) {
 		            if(p.getLocation().getBlock().getType().equals(Material.GOLD_PLATE)){
-						p.setVelocity(p.getLocation().getDirection().divide(new Vector(2,2,2)).setY(1.8));
+						p.setVelocity(p.getLocation().getDirection().multiply(0.25).setY(1.8));
 		                return;
 		            }
 		            if(p.getLocation().getBlock().getType().equals(Material.IRON_PLATE)){
@@ -55,14 +63,15 @@ public class Loader extends JavaPlugin {
 			}
 		}.runRepeating(3, 2);
 		
-		TheAPI.createAndRegisterCommand("knockbackffa", "knockbackffa.command", new KBFFACmd(), "kbffa");
+		TheAPI.createAndRegisterCommand("knockbackffa", null, new KBFFACmd(), "kbffa");
 		
 		//task na change areny
 		arenaChangeTask=new Tasker() {
 			public void run() {
 				API.arena.a.getWorld().setTime(1000);
 				if(--nextArenaIn==0) {
-					API.arena.moveAll(API.nextArena());
+					API.setArena(next);
+					next=API.nextArena();
 				}else {
 					switch(nextArenaIn) {
 					case 1:
@@ -117,7 +126,7 @@ public class Loader extends JavaPlugin {
 								++r.i;
 								if(l.getBlock().getType().getId()==159)
 									l.getBlock().setType(Material.AIR);
-								if(r.giveBack)
+								if(r.giveBack&&r.player.isOnline())
 									API.arena.addBlock(r.player);
 								r.giveBack=false;
 								KnockEvents.blocky.remove(l);
@@ -136,7 +145,7 @@ public class Loader extends JavaPlugin {
 								++r.i;
 								if(l.getBlock().getType()==Material.GOLD_PLATE)
 									l.getBlock().setType(Material.AIR);
-								if(r.giveBack && !r.player.getInventory().contains(Material.GOLD_PLATE))
+								if(r.giveBack && r.player.isOnline()&&!r.player.getInventory().contains(Material.GOLD_PLATE))
 									TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.GOLD_PLATE,1,"&e&lJumpPad"));
 								r.giveBack=false;
 								KnockEvents.jumps.remove(l);

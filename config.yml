@@ -1,0 +1,5 @@
+rewards:
+  required-kills: 250
+  commands:
+  - "tokens add %player% 5"
+  messages: []

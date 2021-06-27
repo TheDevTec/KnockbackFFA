@@ -11,13 +11,16 @@ public class API {
 
     public static Arena nextArena() {
     	if(arenas.size()<=1) {
-        	if(arena==null)return arena=TheAPI.getRandomFromCollection(arenas.values());
-    		return arena;
+        	return TheAPI.getRandomFromCollection(arenas.values());
     	}
     	Arena next = TheAPI.getRandomFromCollection(arenas.values());
     	while(next.equals(arena))
     		next=TheAPI.getRandomFromCollection(arenas.values());
-    	return arena=next;
+    	return next;
+    }
+    
+    public static void setArena(Arena current) {
+    	arena=arena.moveAll(current);
     }
     
     public static Map<String, Arena> getArenas(){
@@ -25,7 +28,6 @@ public class API {
     }
 
 	public static Arena getArena() {
-		// TODO Auto-generated method stub
 		return arena;
 	}
 }

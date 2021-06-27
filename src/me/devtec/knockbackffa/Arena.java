@@ -35,7 +35,7 @@ public class Arena {
 	public Location spawn;
 	public Position a,b;
 	public String name;
-	public ItemStack[] itemStacks =
+	public static ItemStack[] itemStacks =
             Arrays.asList(
             		unb(addEnchants(ItemCreatorAPI.create(Material.STICK, 1, "&c&lKnockback tycka"))),
                     unb(addEnchants2(ItemCreatorAPI.create(Material.BOW, 1, "&6&lLuk"))),
@@ -54,7 +54,7 @@ public class Arena {
     	b=data.getAs("b", Position.class);
 	}
 
-	private ItemStack unb(ItemStack addEnchants2) {
+	private static ItemStack unb(ItemStack addEnchants2) {
 		ItemMeta a= addEnchants2.getItemMeta();
 		a.spigot().setUnbreakable(true);
 		a.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DESTROYS, ItemFlag.HIDE_PLACED_ON, ItemFlag.HIDE_POTION_EFFECTS, ItemFlag.HIDE_UNBREAKABLE);
@@ -70,12 +70,12 @@ public class Arena {
 		return addEnchants2;
 	}
 
-	private ItemStack addEnchants(ItemStack create) {
+	private static ItemStack addEnchants(ItemStack create) {
 		create.addUnsafeEnchantment(Enchantment.KNOCKBACK, 3);
 		return create;
 	}
 
-	private ItemStack addEnchants2(ItemStack create) {
+	private static ItemStack addEnchants2(ItemStack create) {
 		create.addUnsafeEnchantment(Enchantment.ARROW_KNOCKBACK, 4);
 		return create;
 	}
@@ -110,7 +110,7 @@ public class Arena {
     	}
     }
 
-    public void moveAll(Arena arena) {
+    public Arena moveAll(Arena arena) {
         if (arena != null) {
     		ArenaSwitchEvent d = new ArenaSwitchEvent(this, arena);
         	TheAPI.callEvent(d);
@@ -118,11 +118,13 @@ public class Arena {
         	if(arena==null)arena=d.getFrom();
         	TheAPI.bcMsg("&b▪&8| &bKBFFA &8› &7Arena zmenena na &b"+arena.name);
         	Loader.nextArenaIn=60*10;
+        	Arena a = arena;
             NMSAPI.postToMainThread(() -> {
             	for (Player player : TheAPI.getOnlinePlayers())
-                	resetPlayer(player);
+                	a.resetPlayer(player);
             });
         }
+        return arena;
     }
 
     public ItemStack[] getItemStacks() {
@@ -141,6 +143,7 @@ public class Arena {
     	if(f!=null)
     	for(Entity e : f)e.remove();
     	if(killer!=null) {
+    		Rewards.add(killer);
         	KillStreaks.addKillSteak(killer);
         	addArrow(killer);
     		TheAPI.msg("&b▪&8| &bKBFFA &8› &7"+generateRandomDeathMessageKiller(dead.getName()), killer);
@@ -170,6 +173,7 @@ public class Arena {
     	for(Entity e : f)e.remove();
     	resetPlayer(dead);
     	if(killer!=null) {
+    		Rewards.add(killer);
         	KillStreaks.addKillSteak(killer);
         	addArrow(killer);
     		TheAPI.msg("&b▪&8| &bKBFFA &8› &7"+generateRandomDeathMessageKiller(dead.getName()), killer);
