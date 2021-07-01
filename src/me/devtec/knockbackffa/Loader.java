@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -17,8 +18,10 @@ import me.devtec.theapi.configapi.Config;
 import me.devtec.theapi.placeholderapi.PlaceholderRegister;
 import me.devtec.theapi.scheduler.Scheduler;
 import me.devtec.theapi.scheduler.Tasker;
+import me.devtec.theapi.utils.Position;
 import me.devtec.theapi.utils.StringUtils;
 import me.devtec.theapi.utils.datakeeper.Data;
+import me.devtec.theapi.utils.nms.NMSAPI;
 
 public class Loader extends JavaPlugin {
 	int arenaChangeTask,blocks,scc;
@@ -47,16 +50,17 @@ public class Loader extends JavaPlugin {
 		if(arena!=null)
 		for(Player p : TheAPI.getOnlinePlayers())
 			arena.join(p);
-		
 		scc=new Tasker() {
 			public void run() {
 				for(Player p : TheAPI.getOnlinePlayers()) {
 		            if(p.getLocation().getBlock().getType().equals(Material.GOLD_PLATE)){
 						p.setVelocity(p.getLocation().getDirection().multiply(0.25).setY(1.8));
+				    	p.playSound(p.getLocation(), Sound.WITHER_SHOOT, 1, 1);
 		                return;
 		            }
 		            if(p.getLocation().getBlock().getType().equals(Material.IRON_PLATE)){
 						p.setVelocity(p.getLocation().getDirection().multiply(4).setY(0.8));
+				    	p.playSound(p.getLocation(), Sound.WITHER_SHOOT, 1, 1);
 		                return;
 		            }
 				}
@@ -70,8 +74,12 @@ public class Loader extends JavaPlugin {
 			public void run() {
 				API.arena.a.getWorld().setTime(1000);
 				if(--nextArenaIn==0) {
+					for(Player p : TheAPI.getOnlinePlayers())
+				    	p.playSound(p.getLocation(), Sound.NOTE_STICKS, 1, 1);
 					API.setArena(next);
 					next=API.nextArena();
+					for(Player p : TheAPI.getOnlinePlayers())
+				    	p.playSound(p.getLocation(), Sound.NOTE_STICKS, 1, 1);
 				}else {
 					switch(nextArenaIn) {
 					case 1:
@@ -79,6 +87,8 @@ public class Loader extends JavaPlugin {
 					case 3:
 					case 10:
 					case 15:
+						for(Player p : TheAPI.getOnlinePlayers())
+			    		p.playSound(p.getLocation(), Sound.NOTE_PLING, 1, 1);
 			        	TheAPI.bcMsg("&b▪&8| &bKBFFA &8› &7Arena se zmeni za &b"+nextArenaIn+"s");
 			        	break;
 					}
@@ -99,33 +109,34 @@ public class Loader extends JavaPlugin {
 							r.placeTime=System.currentTimeMillis()/1000+r.tickTime;
 							if(r.i==0){
 								if(l.getBlock().getType()!=Material.HARD_CLAY) {
-									l.getBlock().setType(Material.AIR);
+									NMSAPI.postToMainThread(()->l.getBlock().setType(Material.AIR));
 									KnockEvents.blocky.remove(l);
 									continue;
 								}
 								++r.i;
-								l.getBlock().setTypeIdAndData(159,(byte)4,true);
+								new Position(l).setTypeAndUpdate(Material.getMaterial(159), 4);
 								continue;
 							}
 							if(r.i==1){
 								++r.i;
-								l.getBlock().setTypeIdAndData(159,(byte)1,true);
+								new Position(l).setTypeAndUpdate(Material.getMaterial(159), 1);
 								continue;
 							}
 							if(r.i==2){
 								++r.i;
-								l.getBlock().setTypeIdAndData(159,(byte)6,true);
+								new Position(l).setTypeAndUpdate(Material.getMaterial(159), 6);
 								continue;
 							}
 							if(r.i==3){
 								++r.i;
-								l.getBlock().setTypeIdAndData(159,(byte)14,true);
+								new Position(l).setTypeAndUpdate(Material.getMaterial(159), 14);
 								continue;
 							}
 							if(r.i==4){
 								++r.i;
-								if(l.getBlock().getType().getId()==159)
-									l.getBlock().setType(Material.AIR);
+								if(l.getBlock().getType().getId()==159) {
+									NMSAPI.postToMainThread(()->l.getBlock().setType(Material.AIR));
+								}
 								if(r.giveBack&&r.player.isOnline())
 									API.arena.addBlock(r.player);
 								r.giveBack=false;
@@ -143,8 +154,9 @@ public class Loader extends JavaPlugin {
 							if(r.i!=0)return;
 							if(r.placeTime-System.currentTimeMillis()/1000<=0) {
 								++r.i;
-								if(l.getBlock().getType()==Material.GOLD_PLATE)
-									l.getBlock().setType(Material.AIR);
+								if(l.getBlock().getType()==Material.GOLD_PLATE) {
+									NMSAPI.postToMainThread(()->l.getBlock().setType(Material.AIR));
+								}
 								if(r.giveBack && r.player.isOnline()&&!r.player.getInventory().contains(Material.GOLD_PLATE))
 									TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.GOLD_PLATE,1,"&e&lJumpPad"));
 								r.giveBack=false;
@@ -156,7 +168,7 @@ public class Loader extends JavaPlugin {
 					err.printStackTrace();
 				}
 			}
-		}.runRepeatingSync(0,3);
+		}.runRepeating(0,3);
 		d=new PlaceholderRegister("kbffa","DevTec","1.0") {
 			public String onRequest(Player player, String s) {
 				if(s.startsWith("top_")) {

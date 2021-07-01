@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -143,6 +144,7 @@ public class Arena {
     	if(f!=null)
     	for(Entity e : f)e.remove();
     	if(killer!=null) {
+    		killer.playSound(killer.getLocation(), Sound.ORB_PICKUP, 1, 1);
     		Rewards.add(killer);
         	KillStreaks.addKillSteak(killer);
         	addArrow(killer);
@@ -156,6 +158,11 @@ public class Arena {
     		if(r.player.getName().equals(dead.getName()))r.giveBack=false;
     	new Tasker() {
 			public void run() {
+				dead.playSound(dead.getLocation(), Sound.ANVIL_LAND, 1, 1);
+			}
+		}.runLater(1);
+    	new Tasker() {
+			public void run() {
 				Arena.this.dead.remove(dead);
 			}
 		}.runLater(20);
@@ -163,6 +170,7 @@ public class Arena {
     
     public void notifyDeath(Player dead) {
     	if(this.dead.contains(dead))return;
+		
     	Player killer = KnockEvents.lastHit.remove(dead);
     	ArenaDeathEvent d = new ArenaDeathEvent(dead,killer);
     	TheAPI.callEvent(d);
@@ -173,6 +181,7 @@ public class Arena {
     	for(Entity e : f)e.remove();
     	resetPlayer(dead);
     	if(killer!=null) {
+    		killer.playSound(killer.getLocation(), Sound.ORB_PICKUP, 1, 1);
     		Rewards.add(killer);
         	KillStreaks.addKillSteak(killer);
         	addArrow(killer);
@@ -189,6 +198,11 @@ public class Arena {
     		if(r.player.getName().equals(dead.getName()))r.giveBack=false;
     	for(BlockStateRemove r : KnockEvents.jumps.values())
     		if(r.player.getName().equals(dead.getName()))r.giveBack=false;
+    	new Tasker() {
+			public void run() {
+				dead.playSound(dead.getLocation(), Sound.ANVIL_LAND, 1, 1);
+			}
+		}.runLater(1);
     	new Tasker() {
 			public void run() {
 				Arena.this.dead.remove(dead);

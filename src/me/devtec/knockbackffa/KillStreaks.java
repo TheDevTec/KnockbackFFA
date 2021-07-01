@@ -1,20 +1,28 @@
 package me.devtec.knockbackffa;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import me.devtec.theapi.TheAPI;
+import me.devtec.theapi.particlesapi.Particle;
+import me.devtec.theapi.particlesapi.ParticleAPI;
+import me.devtec.theapi.particlesapi.ParticleData;
 import me.devtec.theapi.scheduler.Tasker;
 import me.devtec.theapi.sortedmap.RankingAPI;
+import me.devtec.theapi.utils.Position;
 import me.devtec.theapi.utils.datakeeper.User;
 
 public class KillStreaks {
 	static Map<Player, Integer> killsteak = new HashMap<>();
+	static Player top;
 	
 	static {
 		Map<String, Integer> f = new HashMap<>();
@@ -44,6 +52,28 @@ public class KillStreaks {
 				f.clear();
 			}
 		}.runRepeating(20*60, 20*60);
+		new Tasker() {
+			public void run() {
+				if(top!=null && killsteak.get(top)!=0) {
+					if(top.isOnline()) {
+						List<Player> ps = TheAPI.getPlayers();
+						ps.remove(top);
+						if(!ps.isEmpty())
+						ParticleAPI.spawnParticle(ps, topKiller, new Position(top.getLocation().add(0,2.5,0)));
+					}
+				}
+			}
+		}.runRepeating(20, 5);
+		new Tasker() {
+			public void run() {
+				if(killsteak.isEmpty()) {
+					top=null;
+				}else {
+					RankingAPI<Player, Integer> e = new RankingAPI<>(killsteak);
+					top=e.getObject(1);
+				}
+			}
+		}.runRepeating(20, 20);
 	}
 	
 	static RankingAPI<String, Integer> sc; 
@@ -57,6 +87,7 @@ public class KillStreaks {
 
 	public static void reset(Player p) {
 		killsteak.remove(p);
+		if(top!=null && top.equals(p))top=null;
 	}
 	
 	public static int getTop(Player p) {
@@ -71,9 +102,26 @@ public class KillStreaks {
 		return sc.getValue(sc.getObject(i));
 	}
 	
+	private static Particle walkspeed = new Particle("BLOCK_CRACK", new ParticleData.BlockOptions(Material.DIAMOND_BLOCK,(byte)0)),
+			topKiller = new Particle("BLOCK_CRACK", new ParticleData.BlockOptions(Material.EMERALD_BLOCK,(byte)0));
+	
 	private static void notifyKillsteak(Player p, int sc) {
-		if(sc%6==3)API.arena.addEnderpearl(p);
-		else if(sc%6==5)p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20*60, 2, false, false));
+		if(sc%6==3) {
+    		p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
+			API.arena.addEnderpearl(p);
+		}
+		else if(sc%6==5) {
+    		p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
+    		new Tasker() {
+				public void run() {
+					List<Player> ps = TheAPI.getPlayers();
+					ps.remove(p);
+					if(!ps.isEmpty())
+					ParticleAPI.spawnParticle(ps, walkspeed, new Position(p.getLocation().add(0,2.5+(top!=null && top.equals(p) && killsteak.get(top)!=0?2:0),0)));
+				}
+			}.runRepeatingTimes(0, 5, 240);
+			p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20*60, 2, false, false));
+		}
 	}
 	
 }

@@ -1,5 +1,6 @@
 package me.devtec.knockbackffa;
 
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 import me.devtec.theapi.TheAPI;
@@ -26,6 +27,7 @@ public class Rewards { //quests?
 	}
 	
 	public static void giveRewards(Player player) {
+		player.playSound(player.getLocation(), Sound.ENDERDRAGON_GROWL, 1, 1);
 		for(String s : Loader.c.getStringList("rewards.commands")) {
 			TheAPI.sudoConsole(PlaceholderAPI.setPlaceholders(player, s.replace("%player%", player.getName())));
 		}

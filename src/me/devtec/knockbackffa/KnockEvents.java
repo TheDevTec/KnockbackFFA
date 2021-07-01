@@ -106,6 +106,7 @@ public class KnockEvents implements Listener {
     @EventHandler
     public void quit(PlayerQuitEvent e) {
         e.setQuitMessage("");
+        KillStreaks.reset(e.getPlayer());
         API.arena.notifyLeave(e.getPlayer());
     }
 
@@ -170,12 +171,12 @@ public class KnockEvents implements Listener {
 
     @EventHandler
     public void blockPlace(BlockPlaceEvent e) {
+        if(e.isCancelled())return;
     	if(e.getPlayer().getGameMode()==GameMode.CREATIVE)return;
         if(!API.arena.isInRegion(e.getBlock().getLocation())) {
         	e.setCancelled(true);
         	return;
         }
-        if(e.isCancelled())return;
         if(e.getBlock().getType().equals(Material.HARD_CLAY))
             blocky.put(e.getBlock().getLocation(),new BlockStateRemove(e.getPlayer(),3));
         if(e.getBlock().getType().equals(Material.GOLD_PLATE)){
