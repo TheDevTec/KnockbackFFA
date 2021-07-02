@@ -104,6 +104,7 @@ public class Arena {
     		dead.teleport(spawn);
         	dead.setFireTicks(-20);
         	dead.getInventory().clear();
+        	dead.setItemOnCursor(null);
         	dead.getInventory().setContents(itemStacks);
         	dead.updateInventory();
     	}catch(Exception ner) {

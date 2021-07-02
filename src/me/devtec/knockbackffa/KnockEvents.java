@@ -15,6 +15,7 @@ import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -152,6 +153,11 @@ public class KnockEvents implements Listener {
     		projectiles.put((Player)e.getEntity().getShooter(), ee=new ArrayList<>());
     	}
     	ee.add(e.getEntity());
+    }
+
+    @EventHandler
+    public void shoot(BlockFadeEvent e) {
+    	if(e.getBlock().getType()==Material.ICE)e.setCancelled(true);
     }
 
     @EventHandler

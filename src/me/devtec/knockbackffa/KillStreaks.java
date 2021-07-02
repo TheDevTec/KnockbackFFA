@@ -23,6 +23,7 @@ import me.devtec.theapi.utils.datakeeper.User;
 public class KillStreaks {
 	static Map<Player, Integer> killsteak = new HashMap<>();
 	static Player top;
+	static RankingAPI<Player, Integer> e;
 	
 	static {
 		Map<String, Integer> f = new HashMap<>();
@@ -54,6 +55,7 @@ public class KillStreaks {
 		}.runRepeating(20*60, 20*60);
 		new Tasker() {
 			public void run() {
+				if(!killsteak.isEmpty())
 				if(top!=null && killsteak.get(top)!=0) {
 					if(top.isOnline()) {
 						List<Player> ps = TheAPI.getPlayers();
@@ -69,7 +71,7 @@ public class KillStreaks {
 				if(killsteak.isEmpty()) {
 					top=null;
 				}else {
-					RankingAPI<Player, Integer> e = new RankingAPI<>(killsteak);
+					e = new RankingAPI<>(killsteak);
 					top=e.getObject(1);
 				}
 			}
@@ -87,7 +89,10 @@ public class KillStreaks {
 
 	public static void reset(Player p) {
 		killsteak.remove(p);
-		if(top!=null && top.equals(p))top=null;
+		if(top!=null && top.equals(p)) {
+			e.getMap().remove(p);
+			top=e.getObject(1);
+		}
 	}
 	
 	public static int getTop(Player p) {
@@ -101,9 +106,8 @@ public class KillStreaks {
 	public static int getValue(int i) {
 		return sc.getValue(sc.getObject(i));
 	}
-	
-	private static Particle walkspeed = new Particle("BLOCK_CRACK", new ParticleData.BlockOptions(Material.DIAMOND_BLOCK,(byte)0)),
-			topKiller = new Particle("BLOCK_CRACK", new ParticleData.BlockOptions(Material.EMERALD_BLOCK,(byte)0));
+	private static Particle walkspeed = new Particle("VILLAGER_HAPPY"),
+			topKiller = new Particle("BLOCK_CRACK", new ParticleData.BlockOptions(Material.REDSTONE_BLOCK,(byte)0));
 	
 	private static void notifyKillsteak(Player p, int sc) {
 		if(sc%6==3) {
@@ -117,7 +121,7 @@ public class KillStreaks {
 					List<Player> ps = TheAPI.getPlayers();
 					ps.remove(p);
 					if(!ps.isEmpty())
-					ParticleAPI.spawnParticle(ps, walkspeed, new Position(p.getLocation().add(0,2.5+(top!=null && top.equals(p) && killsteak.get(top)!=0?2:0),0)));
+					ParticleAPI.spawnParticle(ps, walkspeed, new Position(p.getLocation().add(0,2.5+(top!=null && top.equals(p) && killsteak.get(top)!=0?1:0),0)));
 				}
 			}.runRepeatingTimes(0, 5, 240);
 			p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20*60, 2, false, false));
