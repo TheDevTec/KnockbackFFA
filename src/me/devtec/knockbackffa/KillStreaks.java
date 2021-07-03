@@ -55,14 +55,16 @@ public class KillStreaks {
 		}.runRepeating(20*60, 20*60);
 		new Tasker() {
 			public void run() {
-				if(!killsteak.isEmpty())
-				if(top!=null && killsteak.get(top)!=0) {
-					if(top.isOnline()) {
-						List<Player> ps = TheAPI.getPlayers();
-						ps.remove(top);
-						if(!ps.isEmpty())
-						ParticleAPI.spawnParticle(ps, topKiller, new Position(top.getLocation().add(0,2.5,0)));
-					}
+				try {
+					if(!killsteak.isEmpty())
+						if(top!=null && top.isOnline() && killsteak.get(top)!=0) {
+							List<Player> ps = TheAPI.getPlayers();
+							ps.remove(top);
+							if(!ps.isEmpty())
+							ParticleAPI.spawnParticle(ps, topKiller, new Position(top.getLocation().add(0,2.5,0)));
+						}
+				}catch(Exception er) {
+					
 				}
 			}
 		}.runRepeating(20, 5);
@@ -118,6 +120,10 @@ public class KillStreaks {
     		p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
     		new Tasker() {
 				public void run() {
+					if(!p.isOnline()) {
+						cancel();
+						return;
+					}
 					List<Player> ps = TheAPI.getPlayers();
 					ps.remove(p);
 					if(!ps.isEmpty())
