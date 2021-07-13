@@ -13,7 +13,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFormEvent;
@@ -37,6 +36,7 @@ import org.bukkit.event.weather.ThunderChangeEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.ItemStack;
 
+import me.devtec.theapi.TheAPI;
 import me.devtec.theapi.scheduler.Tasker;
 import me.devtec.theapi.utils.Position;
 
@@ -101,9 +101,18 @@ public class KnockEvents implements Listener {
     			||type==Material.SAND||type==Material.GRAVEL||type==Material.ICE||type==Material.SNOW||type==Material.SNOW_BLOCK;
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler
     public void join(PlayerJoinEvent e) {
         e.setJoinMessage("");
+        for(Player p : TheAPI.getOnlinePlayers())
+        	if(p!=e.getPlayer()) {
+        		p.hidePlayer(e.getPlayer());
+        		new Tasker() {
+					public void run() {
+		        		p.showPlayer(e.getPlayer());
+					}
+				}.runLater(5);
+        	}
     	if(API.arena!=null)
             API.arena.join(e.getPlayer());
     }
