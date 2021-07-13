@@ -89,6 +89,13 @@ public class KnockEvents implements Listener {
     }
 
     @EventHandler
+    public void blockUpdate(BlockFadeEvent e) {
+    	if(e.getBlock().getType()==Material.LAVA||e.getBlock().getType()==Material.STATIONARY_LAVA
+    			||e.getBlock().getType()==Material.WATER||e.getBlock().getType()==Material.STATIONARY_WATER
+    			||e.getBlock().getType()==Material.SAND||e.getBlock().getType()==Material.GRAVEL)e.setCancelled(true);
+    }
+
+    @EventHandler
     public void join(PlayerJoinEvent e) {
         e.setJoinMessage("");
         for(Player p : TheAPI.getOnlinePlayers())
