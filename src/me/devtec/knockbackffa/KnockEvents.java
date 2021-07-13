@@ -6,16 +6,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -34,13 +35,14 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.weather.ThunderChangeEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
+import org.bukkit.inventory.ItemStack;
 
-import me.devtec.theapi.TheAPI;
 import me.devtec.theapi.scheduler.Tasker;
+import me.devtec.theapi.utils.Position;
 
 public class KnockEvents implements Listener {
-    protected static Map<Location, BlockStateRemove> blocky = new HashMap<>();
-    protected static Map<Location, BlockStateRemove> jumps = new HashMap<>();
+    protected static Map<Position, BlockStateRemove> blocky = new HashMap<>();
+    protected static Map<Position, BlockStateRemove> jumps = new HashMap<>();
     protected static Map<Player, Player> lastHit = new HashMap<>();
     
     protected static Map<Player, List<Entity>> projectiles = new HashMap<>();
@@ -89,24 +91,19 @@ public class KnockEvents implements Listener {
     }
 
     @EventHandler
-    public void blockUpdate(BlockFadeEvent e) {
-    	if(e.getBlock().getType()==Material.LAVA||e.getBlock().getType()==Material.STATIONARY_LAVA
-    			||e.getBlock().getType()==Material.WATER||e.getBlock().getType()==Material.STATIONARY_WATER
-    			||e.getBlock().getType()==Material.SAND||e.getBlock().getType()==Material.GRAVEL)e.setCancelled(true);
+    public void blockUpdate(BlockFormEvent e) {
+    	if(!isAccepted(e.getBlock().getType()) || !isAccepted(e.getNewState().getType()))e.setCancelled(true);
     }
 
-    @EventHandler
+    private boolean isAccepted(Material type) {
+		return type==Material.LAVA||type==Material.STATIONARY_LAVA
+    			||type==Material.WATER||type==Material.STATIONARY_WATER
+    			||type==Material.SAND||type==Material.GRAVEL||type==Material.ICE||type==Material.SNOW||type==Material.SNOW_BLOCK;
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR)
     public void join(PlayerJoinEvent e) {
         e.setJoinMessage("");
-        for(Player p : TheAPI.getOnlinePlayers())
-        	if(p!=e.getPlayer()) {
-        		p.hidePlayer(e.getPlayer());
-        		new Tasker() {
-					public void run() {
-		        		p.showPlayer(e.getPlayer());
-					}
-				}.runLater(5);
-        	}
     	if(API.arena!=null)
             API.arena.join(e.getPlayer());
     }
@@ -163,11 +160,6 @@ public class KnockEvents implements Listener {
     }
 
     @EventHandler
-    public void shoot(BlockFadeEvent e) {
-    	if(e.getBlock().getType()==Material.ICE)e.setCancelled(true);
-    }
-
-    @EventHandler
     public void weather(WeatherChangeEvent e) {
     	e.setCancelled(true);
     }
@@ -184,16 +176,26 @@ public class KnockEvents implements Listener {
 
     @EventHandler
     public void blockPlace(BlockPlaceEvent e) {
-        if(e.isCancelled())return;
+        if(e.isCancelled() || !e.canBuild())return;
     	if(e.getPlayer().getGameMode()==GameMode.CREATIVE)return;
         if(!API.arena.isInRegion(e.getBlock().getLocation())) {
         	e.setCancelled(true);
         	return;
         }
-        if(e.getBlock().getType().equals(Material.HARD_CLAY))
-            blocky.put(e.getBlock().getLocation(),new BlockStateRemove(e.getPlayer(),3));
+        if(e.getBlock().getType().equals(Material.HARD_CLAY)) {
+            blocky.put(new Position(e.getBlock().getLocation()),new BlockStateRemove(e.getPlayer(),3,e.getBlockReplacedState()));
+        }
         if(e.getBlock().getType().equals(Material.GOLD_PLATE)){
-        	jumps.put(e.getBlock().getLocation(), new BlockStateRemove(e.getPlayer(),5));
+			if(e.getItemInHand().getAmount()==1) {
+				e.getPlayer().setItemInHand(new ItemStack(Material.AIR));
+			}else
+				e.getItemInHand().setAmount(e.getItemInHand().getAmount()-1);
+        	new Tasker() {
+				public void run() {
+					e.getBlock().setType(e.getItemInHand().getType());
+				}
+			}.runTaskSync();
+        	jumps.put(new Position(e.getBlock().getLocation()), new BlockStateRemove(e.getPlayer(),5,e.getBlockReplacedState()));
         }
     }
     
@@ -232,9 +234,11 @@ public class KnockEvents implements Listener {
     long placeTime;
     int tickTime;
     int i;
-    public BlockStateRemove(Player p,int time){
+    BlockState state;
+    public BlockStateRemove(Player p,int time, BlockState blockReplacedState){
         player=p;
         tickTime=time;
         placeTime=System.currentTimeMillis()/1000+time;
+        state=blockReplacedState;
     }
 }

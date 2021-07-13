@@ -96,17 +96,22 @@ public class Arena {
 	public void join(Player dead) {
 		ArenaJoinEvent d = new ArenaJoinEvent(dead);
     	TheAPI.callEvent(d);
-    	resetPlayer(dead);
+		resetPlayer(dead);
     }
 	
 	public void resetPlayer(Player dead) {
     	try {
-    		dead.teleport(spawn);
         	dead.setFireTicks(-20);
         	dead.getInventory().clear();
         	dead.setItemOnCursor(null);
-        	dead.getInventory().setContents(itemStacks);
-        	dead.updateInventory();
+    		dead.teleport(spawn);
+        	new Tasker() {
+				public void run() {
+					int i = 0;
+		        	for(ItemStack s : itemStacks)
+		        		dead.getInventory().setItem(i++, s);
+				}
+			}.runLater(1);
     	}catch(Exception ner) {
     		ner.printStackTrace();
     	}

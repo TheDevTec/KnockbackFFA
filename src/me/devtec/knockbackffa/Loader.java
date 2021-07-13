@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -100,43 +99,41 @@ public class Loader extends JavaPlugin {
 			public void run() {
 				try {
 					synchronized(KnockEvents.blocky) {
-					Iterator<Entry<Location, BlockStateRemove>> e = new HashSet<>(KnockEvents.blocky.entrySet()).iterator();
+					Iterator<Entry<Position, BlockStateRemove>> e = new HashSet<>(KnockEvents.blocky.entrySet()).iterator();
 					while(e.hasNext()) {
-						Entry<Location,BlockStateRemove> ll = e.next();
-						Location l=ll.getKey();
+						Entry<Position,BlockStateRemove> ll = e.next();
+						Position l=ll.getKey();
 						BlockStateRemove r = ll.getValue();
 						if(r.placeTime-System.currentTimeMillis()/1000<=0) {
 							r.placeTime=System.currentTimeMillis()/1000+r.tickTime;
 							if(r.i==0){
-								if(l.getBlock().getType()!=Material.HARD_CLAY) {
+								if(l.getBukkitType()!=Material.HARD_CLAY) {
 									NMSAPI.postToMainThread(()->l.getBlock().setType(Material.AIR));
 									KnockEvents.blocky.remove(l);
 									continue;
 								}
 								++r.i;
-								new Position(l).setTypeAndUpdate(Material.getMaterial(159), 4);
+								l.setTypeAndUpdate(Material.getMaterial(159), 4);
 								continue;
 							}
 							if(r.i==1){
 								++r.i;
-								new Position(l).setTypeAndUpdate(Material.getMaterial(159), 1);
+								l.setTypeAndUpdate(Material.getMaterial(159), 1);
 								continue;
 							}
 							if(r.i==2){
 								++r.i;
-								new Position(l).setTypeAndUpdate(Material.getMaterial(159), 6);
+								l.setTypeAndUpdate(Material.getMaterial(159), 6);
 								continue;
 							}
 							if(r.i==3){
 								++r.i;
-								new Position(l).setTypeAndUpdate(Material.getMaterial(159), 14);
+								l.setTypeAndUpdate(Material.getMaterial(159), 14);
 								continue;
 							}
 							if(r.i==4){
 								++r.i;
-								if(l.getBlock().getType().getId()==159) {
-									NMSAPI.postToMainThread(()->l.getBlock().setType(Material.AIR));
-								}
+								NMSAPI.postToMainThread(()->ll.getValue().state.update(true,true));
 								if(r.giveBack&&r.player.isOnline())
 									API.arena.addBlock(r.player);
 								r.giveBack=false;
@@ -146,17 +143,15 @@ public class Loader extends JavaPlugin {
 					}
 					}
 					synchronized(KnockEvents.jumps){
-						Iterator<Entry<Location, BlockStateRemove>> e = new HashSet<>(KnockEvents.jumps.entrySet()).iterator();
+						Iterator<Entry<Position, BlockStateRemove>> e = new HashSet<>(KnockEvents.jumps.entrySet()).iterator();
 						while(e.hasNext()) {
-							Entry<Location,BlockStateRemove> ll = e.next();
-							Location l=ll.getKey();
+							Entry<Position, BlockStateRemove> ll = e.next();
+							Position l=ll.getKey();
 							BlockStateRemove r = ll.getValue();
 							if(r.i!=0)return;
 							if(r.placeTime-System.currentTimeMillis()/1000<=0) {
 								++r.i;
-								if(l.getBlock().getType()==Material.GOLD_PLATE) {
-									NMSAPI.postToMainThread(()->l.getBlock().setType(Material.AIR));
-								}
+								NMSAPI.postToMainThread(()->ll.getValue().state.update(true,true));
 								if(r.giveBack && r.player.isOnline()&&!r.player.getInventory().contains(Material.GOLD_PLATE))
 									TheAPI.giveItem(r.player, ItemCreatorAPI.create(Material.GOLD_PLATE,1,"&e&lJumpPad"));
 								r.giveBack=false;
@@ -204,12 +199,12 @@ public class Loader extends JavaPlugin {
 	}
 	
 	public void onDisable() {
-		for(Location e : KnockEvents.blocky.keySet()) {
-			e.getBlock().setType(Material.AIR);
+		for(BlockStateRemove e : KnockEvents.blocky.values()) {
+			e.state.update(true,true);
 		}
 		KnockEvents.blocky.clear();
-		for(Location e : KnockEvents.jumps.keySet()) {
-			e.getBlock().setType(Material.AIR);
+		for(BlockStateRemove e : KnockEvents.jumps.values()) {
+			e.state.update(true,true);
 		}
 		KnockEvents.jumps.clear();
 		d.doUnregister();
